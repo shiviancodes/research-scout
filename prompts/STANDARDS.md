@@ -4,8 +4,8 @@ Every agent in research-scout must read this document before scoring any
 finding or writing any brief. The standards are absolute. Do not relax
 them because a candidate idea is "interesting" or "topical".
 
-The reference briefs `docs/NEXUS_OVERVIEW.md` and `docs/OMNIGEN_OVERVIEW.md`
-are the canonical examples. Match their depth, specificity, and tone.
+The reference brief `docs/EXAMPLE_BRIEF_FORMAT.md` is the canonical example.
+Match its depth, specificity, and tone.
 
 ---
 

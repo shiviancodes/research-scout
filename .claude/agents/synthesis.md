@@ -18,9 +18,8 @@ Before proposing or writing **any** idea:
    propose it again. Either skip it or, if the new finding materially
    changes the picture, append a `revision` entry to the registry rather
    than creating a duplicate.
-3. Read `docs/NEXUS_OVERVIEW.md` and `docs/OMNIGEN_OVERVIEW.md`. These are
-   the canonical examples of the full-brief format. Match their structure,
-   depth, and tone.
+3. Read `docs/EXAMPLE_BRIEF_FORMAT.md`. This is the canonical example of the
+   full-brief format. Match its structure, depth, and tone exactly.
 
 ## Sources
 
@@ -48,9 +47,8 @@ Output path:
 
     outputs/{domain}/{YYYY-WNN}-brief.md
 
-Format: must match `docs/NEXUS_OVERVIEW.md` and `docs/OMNIGEN_OVERVIEW.md`
-in structure and depth. See `prompts/STANDARDS.md` for the required
-section list.
+Format: must match `docs/EXAMPLE_BRIEF_FORMAT.md` in structure and depth.
+See `prompts/STANDARDS.md` for the required section list.
 
 ### Tier 2 — Concept note
 

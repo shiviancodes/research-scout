@@ -2,7 +2,7 @@
 
 A local research intelligence system that uses Claude Code sub-agents to autonomously
 research industries, score findings against a defined quality bar, and generate
-project briefs in the style of `docs/NEXUS_OVERVIEW.md` and `docs/OMNIGEN_OVERVIEW.md`.
+project briefs in the style of `docs/EXAMPLE_BRIEF_FORMAT.md`.
 
 ## Folder structure
 
@@ -19,8 +19,8 @@ project briefs in the style of `docs/NEXUS_OVERVIEW.md` and `docs/OMNIGEN_OVERVI
   the synthesis agent before any new idea is written, to prevent duplicates.
 - `backend/` — FastAPI service that serves the `outputs/` directory as JSON.
 - `frontend/` — React + Vite dashboard that consumes the backend.
-- `docs/` — reference materials. `NEXUS_OVERVIEW.md` and `OMNIGEN_OVERVIEW.md` are
-  the canonical examples of the brief format every full brief must match.
+- `docs/` — reference materials. `EXAMPLE_BRIEF_FORMAT.md` is the canonical
+  example of the brief format every full brief must match.
 
 ## Output naming convention
 
