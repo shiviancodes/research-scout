@@ -1,5 +1,11 @@
 # research-scout
 
+[![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
+[![Python](https://img.shields.io/badge/Python-3.11+-blue.svg)](https://python.org)
+[![Node](https://img.shields.io/badge/Node-18+-brightgreen.svg)](https://nodejs.org)
+[![Claude Code](https://img.shields.io/badge/Claude-Code-orange.svg)](https://claude.ai/code)
+[![React](https://img.shields.io/badge/React-Vite-61dafb.svg)](https://vitejs.dev)
+
 research-scout turns Claude Code into a private research analyst. You point it at an industry — finance, healthcare, energy — and a team of specialised sub-agents scours the space for project ideas, scores every candidate against a quality bar, and produces structured briefs you can act on. The output is a tiered pipeline of fully-written project briefs, concept notes, and a persistent ideas workspace, all rendered in a local dashboard that you own completely.
 
 ## How it works
