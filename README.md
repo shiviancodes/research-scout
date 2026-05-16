@@ -63,11 +63,11 @@ make start   # every time
 make stop    # when done
 ```
 
-Open **http://localhost:*port***  (Open the dashboard URL printed by the start script)
+Open the URL printed by the start script (default: http://localhost:5173)
 
 ## Running a research session
 
-1. Open the dashboard at `http://localhost:{FRONTEND_PORT}`
+1. Open the dashboard at `http://localhost:5173` (or the URL printed by start script)
 2. Select an industry on the Home page (Finance, Healthcare, or Energy)
 3. Copy the Claude Code prompt shown in the dashboard
 4. Open a terminal at the project root and run: `claude`
@@ -101,18 +101,6 @@ docs/               Reference briefs (NEXUS_OVERVIEW, OMNIGEN_OVERVIEW)
 
 Both are set in `.env` at the project root (copy `.env.example` to get started). Vite runs with `strictPort: true` — if a port is taken it fails loudly rather than silently shifting, so you always know which backend you're talking to.
 
-To find and kill a conflicting process:
+## License 
 
-```powershell
-# Windows
-Get-NetTCPConnection -State Listen -LocalPort 8766 |
-  Select-Object LocalPort,OwningProcess,@{n='Name';e={(Get-Process -Id $_.OwningProcess).ProcessName}}
-Stop-Process -Id <PID> -Force
-```
-
-```bash
-# Mac / Linux
-lsof -iTCP:8766 -sTCP:LISTEN
-kill <PID>
-```
-
+MIT - see LICENSE
