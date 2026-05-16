@@ -1,6 +1,6 @@
 # research-scout
 
-research-scout turns Claude Code into a private research analyst. You point it at an industry — finance, healthcare, energy — and a team of specialised sub-agents scours the space for novel project ideas, scores every candidate against a rigorous quality bar, and produces structured briefs you can act on. The output isn't a list of bullet points: it's a tiered pipeline of fully-written project briefs, concept notes, and a persistent ideas workspace, all rendered in a local dashboard that you own completely.
+research-scout turns Claude Code into a private research analyst. You point it at an industry — finance, healthcare, energy — and a team of specialised sub-agents scours the space for project ideas, scores every candidate against a quality bar, and produces structured briefs you can act on. The output is a tiered pipeline of fully-written project briefs, concept notes, and a persistent ideas workspace, all rendered in a local dashboard that you own completely.
 
 ## How it works
 
@@ -22,7 +22,7 @@ Every run produces tiered output:
 
 | Tier | Output | Threshold |
 |------|--------|-----------|
-| 1 | Full project brief (NEXUS/OMNIGEN format) | Passes all non-negotiables + strong positive signals |
+| 1 | Full project brief | Passes all non-negotiables + strong positive signals |
 | 2 | Concept note | Promising but needs more research |
 | 3 | Discarded | Failed quality gate — logged but not written |
 
@@ -63,16 +63,19 @@ make start   # every time
 make stop    # when done
 ```
 
-Open **http://localhost:5173**
+Open **http://localhost:*port***  (Open the dashboard URL printed by the start script)
 
 ## Running a research session
 
-1. Open the dashboard and select an industry on the Home page.
-2. Open Claude Code in the project root: `claude`
-3. Ask the orchestrator — e.g. `Run the orchestrator for finance.`
-4. Agents run automatically: domain agent → synthesis agent → `outputs/`.
-5. Refresh the History tab to see new briefs and concept notes.
-6. Move ideas through the workflow in the Ideas Workspace.
+1. Open the dashboard at `http://localhost:{FRONTEND_PORT}`
+2. Select an industry on the Home page (Finance, Healthcare, or Energy)
+3. Copy the Claude Code prompt shown in the dashboard
+4. Open a terminal at the project root and run: `claude`
+5. Paste the copied prompt into Claude Code and press Enter
+6. Agents run automatically - domain agent fetches and scores 
+   findings, synthesis agent writes briefs to `outputs/`
+7. Refresh the History tab to see new artefacts
+8. Track and manage ideas in the Ideas Workspace
 
 ## Customising your quality bar
 
@@ -113,6 +116,3 @@ lsof -iTCP:8766 -sTCP:LISTEN
 kill <PID>
 ```
 
-## Built by
-
-Shivian Naidoo — [github.com/shiviancodes](https://github.com/shiviancodes)
