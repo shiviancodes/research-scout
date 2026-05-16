@@ -6,7 +6,7 @@
 [![Claude Code](https://img.shields.io/badge/Claude-Code-orange.svg)](https://claude.ai/code)
 [![React](https://img.shields.io/badge/React-Vite-61dafb.svg)](https://vitejs.dev)
 
-research-scout turns Claude Code into a private research analyst. You point it at an industry — finance, healthcare, energy — and a team of specialised sub-agents scours the space for project ideas, scores every candidate against a quality bar, and produces structured briefs you can act on. The output is a tiered pipeline of fully-written project briefs, concept notes, and a persistent ideas workspace, all rendered in a local dashboard that you own completely.
+research-scout turns Claude Code into a private research analyst. You point it at an industry - finance, healthcare, energy - and a team of specialised sub-agents scours the space for project ideas, scores every candidate against a quality bar, and produces structured briefs you can act on. The output is a tiered pipeline of fully-written project briefs, concept notes, and a persistent ideas workspace, all rendered in a local dashboard that you own completely.
 
 <div align="center">
   <img width="800" height="450" alt="research-scout" src="https://github.com/user-attachments/assets/f5348519-e80f-41fd-977b-2a8fd44b3ce8" />
@@ -34,7 +34,7 @@ Every run produces tiered output:
 |------|--------|-----------|
 | 1 | Full project brief | Passes all non-negotiables + strong positive signals |
 | 2 | Concept note | Promising but needs more research |
-| 3 | Discarded | Failed quality gate — logged but not written |
+| 3 | Discarded | Failed quality gate - logged but not written |
 
 The **Ideas Workspace** (History → Ideas tab) lets you track briefs through a backlog → in-progress → done workflow, attach per-idea to-do lists, and archive completed work. State persists locally in `outputs/ideas-workspace.json`.
 
@@ -89,13 +89,13 @@ Open the URL printed by the start script (default: http://localhost:5173)
 
 ## Customising your quality bar
 
-`prompts/STANDARDS.md` controls what gets promoted to a brief. It defines non-negotiables, positive signals, disqualifiers, and scoring dimensions. Edit it directly or use the **Standards** page in the dashboard — changes take effect on the next run.
+`prompts/STANDARDS.md` controls what gets promoted to a brief. It defines non-negotiables, positive signals, disqualifiers, and scoring dimensions. Edit it directly or use the **Standards** page in the dashboard - changes take effect on the next run.
 
 ## Project structure
 
 ```
 .claude/agents/     Orchestrator + domain + synthesis agent definitions
-backend/            FastAPI — serves outputs/ as a JSON API
+backend/            FastAPI - serves outputs/ as a JSON API
 frontend/           React + Vite dashboard
 outputs/            Generated artefacts (gitignored, folders committed)
 prompts/            STANDARDS.md quality bar
@@ -109,7 +109,7 @@ docs/               Reference briefs (NEXUS_OVERVIEW, OMNIGEN_OVERVIEW)
 | Backend  | 8766    | `BACKEND_PORT` |
 | Frontend | 5173    | `FRONTEND_PORT` |
 
-Both are set in `.env` at the project root (copy `.env.example` to get started). Vite runs with `strictPort: true` — if a port is taken it fails loudly rather than silently shifting, so you always know which backend you're talking to.
+Both are set in `.env` at the project root (copy `.env.example` to get started). Vite runs with `strictPort: true` - if a port is taken it fails loudly rather than silently shifting, so you always know which backend you're talking to.
 
 ## License 
 
