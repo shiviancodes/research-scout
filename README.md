@@ -99,7 +99,7 @@ backend/            FastAPI - serves outputs/ as a JSON API
 frontend/           React + Vite dashboard
 outputs/            Generated artefacts (gitignored, folders committed)
 prompts/            STANDARDS.md quality bar
-docs/               Reference briefs (NEXUS_OVERVIEW, OMNIGEN_OVERVIEW)
+docs/               EXAMPLE_BRIEF_FORMAT.md — canonical brief format reference
 ```
 
 ## Port configuration
