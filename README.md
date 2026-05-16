@@ -8,6 +8,10 @@
 
 research-scout turns Claude Code into a private research analyst. You point it at an industry — finance, healthcare, energy — and a team of specialised sub-agents scours the space for project ideas, scores every candidate against a quality bar, and produces structured briefs you can act on. The output is a tiered pipeline of fully-written project briefs, concept notes, and a persistent ideas workspace, all rendered in a local dashboard that you own completely.
 
+<div align="center">
+  <img width="800" height="450" alt="research-scout" src="https://github.com/user-attachments/assets/f5348519-e80f-41fd-977b-2a8fd44b3ce8" />
+</div>
+
 ## How it works
 
 ```
