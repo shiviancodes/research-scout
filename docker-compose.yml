@@ -1,0 +1,19 @@
+# Optional: use docker compose up instead of the start scripts if you prefer containers.
+# Dockerfiles for each service are not yet written — build lines are commented out.
+services:
+  backend:
+    # build: ./backend
+    # Will run: uvicorn main:app --host 0.0.0.0 --port 8766
+    ports:
+      - "8766:8766"
+    volumes:
+      - ./outputs:/app/outputs:ro
+      - ./prompts:/app/prompts:ro
+
+  frontend:
+    # build: ./frontend
+    # Will run: npm run dev -- --host 0.0.0.0
+    ports:
+      - "5173:5173"
+    depends_on:
+      - backend

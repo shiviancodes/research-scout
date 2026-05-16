@@ -1,0 +1,35 @@
+# Generated artefacts — keep folder skeletons, ignore contents
+outputs/finance/*
+outputs/healthcare/*
+outputs/energy/*
+outputs/concepts/*
+!outputs/finance/.gitkeep
+!outputs/healthcare/.gitkeep
+!outputs/energy/.gitkeep
+!outputs/concepts/.gitkeep
+outputs/registry.json
+outputs/ideas-workspace.json
+
+# Node
+node_modules/
+dist/
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+venv/
+backend/venv/
+
+# Secrets
+.env
+.env.local
+.env.*.local
+
+# Editors
+.vscode/
+.idea/
+
+# OS
+.DS_Store
+Thumbs.db
