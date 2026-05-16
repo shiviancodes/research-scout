@@ -109,4 +109,7 @@ Both are set in `.env` at the project root (copy `.env.example` to get started).
 
 ## License 
 
-MIT - see LICENSE
+
+## License
+
+MIT - see [LICENSE](LICENSE).
