@@ -6,7 +6,7 @@ function GitHubLink() {
   const color = hovered ? '#f0f0f0' : '#6b6b6b';
   return (
     <a
-      href="https://github.com/ShivianNaidoo/research-scout"
+      href="https://github.com/shiviancodes/research-scout"
       target="_blank"
       rel="noreferrer"
       onMouseEnter={() => setHovered(true)}

@@ -37,7 +37,7 @@ The **Ideas Workspace** (History → Ideas tab) lets you track briefs through a 
 ## Quickstart
 
 ```
-git clone https://github.com/ShivianNaidoo/research-scout
+git clone https://github.com/shiviancodes/research-scout
 cd research-scout
 ```
 
@@ -115,4 +115,4 @@ kill <PID>
 
 ## Built by
 
-Shivian Naidoo — [github.com/ShivianNaidoo](https://github.com/ShivianNaidoo)
+Shivian Naidoo — [github.com/shiviancodes](https://github.com/shiviancodes)
