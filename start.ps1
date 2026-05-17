@@ -1,3 +1,6 @@
+# --- Suppress progress UI (prevents cyan Test-NetConnection banner) ---
+$ProgressPreference = 'SilentlyContinue'
+
 # --- .env check ---
 $envPath = Join-Path $PSScriptRoot '.env'
 if (-not (Test-Path $envPath)) {
@@ -34,17 +37,21 @@ $backendProcInfo = Start-Process powershell -ArgumentList @(
 ) -PassThru
 $backendPid = $backendProcInfo.Id
 
-# --- Health probe: wait up to 15s for backend ---
+# --- Health probe: wait up to 30s for backend ---
 $up = $false
-Start-Sleep -Seconds 3
-for ($i = 0; $i -lt 30; $i++) {
-    $test = Test-NetConnection -ComputerName 127.0.0.1 `
-        -Port $backendPort -WarningAction SilentlyContinue
-    if ($test.TcpTestSucceeded) { $up = $true; break }
+for ($i = 0; $i -lt 60; $i++) {
+    try {
+        $client = [System.Net.Sockets.TcpClient]::new()
+        $iar = $client.BeginConnect('127.0.0.1', [int]$backendPort, $null, $null)
+        if ($iar.AsyncWaitHandle.WaitOne(500) -and $client.Connected) {
+            $client.EndConnect($iar); $client.Close(); $up = $true; break
+        }
+        $client.Close()
+    } catch {}
     Start-Sleep -Milliseconds 500
 }
 if (-not $up) {
-    Write-Host "ERROR: Backend did not start on port $backendPort within 10s." -ForegroundColor Red
+    Write-Host "ERROR: Backend did not start on port $backendPort within 30s." -ForegroundColor Red
     Stop-Process -Id $backendPid -Force -ErrorAction SilentlyContinue
     exit 1
 }
