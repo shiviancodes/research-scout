@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { DOMAIN_COLORS, DOMAIN_LABELS } from '../components/BriefCard.jsx';
+import UploadModal from '../components/UploadModal.jsx';
 
 const IDEA_DOMAINS = ['finance', 'healthcare', 'energy'];
 const STATUS_CYCLE = ['backlog', 'in-progress', 'done'];
@@ -33,10 +34,13 @@ export default function IdeasTab() {
   const [statusFilter, setStatusFilter] = useState('all');
   const [archivedOpen, setArchivedOpen] = useState(false);
   const [toast, setToast] = useState(null);
+  const [uploadOpen, setUploadOpen] = useState(false);
+  const [refreshKey, setRefreshKey] = useState(0);
   const toastTimer = useRef(null);
 
   useEffect(() => {
     let cancelled = false;
+    setLoadStatus('loading');
     (async () => {
       try {
         const [regRes, wsRes] = await Promise.all([
@@ -55,10 +59,10 @@ export default function IdeasTab() {
       }
     })();
     return () => { cancelled = true; };
-  }, []);
+  }, [refreshKey]);
 
-  function showToast(msg) {
-    setToast({ msg, key: Date.now() });
+  function showToast(msg, type = 'error') {
+    setToast({ msg, key: Date.now(), type });
     clearTimeout(toastTimer.current);
     toastTimer.current = setTimeout(() => setToast(null), 4000);
   }
@@ -117,6 +121,17 @@ export default function IdeasTab() {
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 24, position: 'relative' }}>
+      {uploadOpen && (
+        <UploadModal
+          onClose={() => setUploadOpen(false)}
+          onUploaded={() => {
+            setUploadOpen(false);
+            setRefreshKey((k) => k + 1);
+            showToast('Brief uploaded and registered.', 'success');
+          }}
+        />
+      )}
+
       {toast && (
         <div
           key={toast.key}
@@ -126,8 +141,10 @@ export default function IdeasTab() {
             right: 24,
             zIndex: 999,
             backgroundColor: '#1e1e1e',
-            border: '1px solid rgba(239,68,68,0.4)',
-            color: '#fca5a5',
+            border: toast.type === 'success'
+              ? '1px solid rgba(13,148,136,0.4)'
+              : '1px solid rgba(239,68,68,0.4)',
+            color: toast.type === 'success' ? '#5eead4' : '#fca5a5',
             fontFamily: 'IBM Plex Mono',
             fontSize: 12,
             padding: '10px 16px',
@@ -138,7 +155,7 @@ export default function IdeasTab() {
         </div>
       )}
 
-      {/* Filters */}
+      {/* Filters + upload */}
       <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: 12 }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
           {['all', ...IDEA_DOMAINS].map((d) => {
@@ -196,6 +213,24 @@ export default function IdeasTab() {
             );
           })}
         </div>
+
+        <button
+          type="button"
+          onClick={() => setUploadOpen(true)}
+          style={{
+            marginLeft: 'auto',
+            padding: '3px 10px',
+            borderRadius: 3,
+            fontFamily: 'IBM Plex Mono',
+            fontSize: 11,
+            cursor: 'pointer',
+            backgroundColor: 'transparent',
+            color: '#9b9b9b',
+            border: '1px solid #2e2e2e',
+          }}
+        >
+          + Upload Brief
+        </button>
       </div>
 
       {/* Active idea cards */}

@@ -6,6 +6,19 @@ Research the finance industry for signals that could plausibly seed a new
 project. Output raw findings only. Scoring and brief authoring are not this
 agent's job — see `synthesis.md`.
 
+## Inputs pre-flight
+
+Before doing any web research, check whether the user has activated local inputs for this domain:
+
+1. Read `inputs/settings.json`.
+2. If `finance` is `false` (or the file is missing), skip to `## Sources` and proceed with web research only.
+3. If `finance` is `true`:
+   a. List all files in `inputs/finance/` (excluding `.gitkeep`).
+   b. For each file named `links.md`: read the file, extract one URL per non-empty line, and use WebFetch to retrieve each URL. Treat the fetched content as an additional source for this run.
+   c. For all other files: read their content directly and treat as additional context for this run.
+   d. After reading all files, **immediately** update `inputs/settings.json` by setting `finance` to `false`. This ensures the same files are not re-consumed on the next run unless the user re-activates.
+4. Incorporate any content from step 3 as supplementary findings alongside your web research. Cite each user-uploaded file or fetched URL as a **Source** entry in the findings file with `(user-provided)` appended.
+
 ## Sources
 
 Prioritise primary, recent, and operator-written sources. Indicative list:
