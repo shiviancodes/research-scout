@@ -1,9 +1,11 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import BriefCard, { DOMAIN_COLORS, DOMAIN_LABELS } from '../components/BriefCard.jsx';
+import RegisterModal from '../components/RegisterModal.jsx';
 import RegistryMap from '../components/RegistryMap.jsx';
 import IdeasTab from './IdeasTab.jsx';
 
 const DOMAIN_ORDER = ['finance', 'healthcare', 'energy', 'concepts'];
+const UPLOAD_DOMAINS = ['energy', 'finance', 'healthcare'];
 const TYPE_FILTERS = ['all', 'project-brief', 'concept', 'findings', 'synthesis'];
 
 const TAB_STYLE_BASE = {
@@ -24,7 +26,10 @@ const TAB_STYLE_BASE = {
 export default function History() {
   const [activeTab, setActiveTab] = useState('artefacts');
   const [state, setState] = useState({ status: 'loading' });
+  const [registeredPaths, setRegisteredPaths] = useState(new Set());
   const [typeFilter, setTypeFilter] = useState('all');
+  const [registerTarget, setRegisterTarget] = useState(null);
+  const [refreshKey, setRefreshKey] = useState(0);
 
   useEffect(() => {
     document.title = 'History — Research Scout';
@@ -34,20 +39,26 @@ export default function History() {
     let cancelled = false;
     (async () => {
       try {
-        const res = await fetch('/api/outputs');
-        const body = await res.json();
+        const [outRes, regRes] = await Promise.all([
+          fetch('/api/outputs'),
+          fetch('/api/registry'),
+        ]);
+        const [outBody, regBody] = await Promise.all([outRes.json(), regRes.json()]);
         if (cancelled) return;
-        if (!res.ok) {
-          setState({ status: 'error', error: body.detail ?? `HTTP ${res.status}` });
+        if (!outRes.ok) {
+          setState({ status: 'error', error: outBody.detail ?? `HTTP ${outRes.status}` });
           return;
         }
-        setState({ status: 'ok', data: body });
+        setState({ status: 'ok', data: outBody });
+        if (regRes.ok) {
+          setRegisteredPaths(new Set((regBody.ideas ?? []).map((i) => i.path)));
+        }
       } catch (err) {
         if (!cancelled) setState({ status: 'error', error: err.message });
       }
     })();
     return () => { cancelled = true; };
-  }, []);
+  }, [refreshKey]);
 
   const grouped = useMemo(() => {
     if (state.status !== 'ok') return {};
@@ -68,6 +79,17 @@ export default function History() {
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 40 }}>
+      {registerTarget && (
+        <RegisterModal
+          file={registerTarget}
+          onClose={() => setRegisterTarget(null)}
+          onRegistered={() => {
+            setRegisterTarget(null);
+            setRefreshKey((k) => k + 1);
+          }}
+        />
+      )}
+
       <header>
         <h1
           style={{
@@ -88,7 +110,7 @@ export default function History() {
 
       {/* Tab bar */}
       <div style={{ display: 'flex', borderBottom: '1px solid #1e1e1e', paddingBottom: 0, marginBottom: -16 }}>
-        {['artefacts', 'ideas'].map((tab) => {
+        {['artefacts', 'ideas', 'sources'].map((tab) => {
           const active = tab === activeTab;
           return (
             <button
@@ -172,7 +194,13 @@ export default function History() {
           {state.status === 'ok' && (
             <div style={{ display: 'flex', flexDirection: 'column', gap: 40 }}>
               {DOMAIN_ORDER.map((d) => (
-                <DomainSection key={d} domain={d} items={grouped[d] ?? []} />
+                <DomainSection
+                  key={d}
+                  domain={d}
+                  items={grouped[d] ?? []}
+                  registeredPaths={registeredPaths}
+                  onRegister={setRegisterTarget}
+                />
               ))}
             </div>
           )}
@@ -182,11 +210,12 @@ export default function History() {
       )}
 
       {activeTab === 'ideas' && <IdeasTab />}
+      {activeTab === 'sources' && <SourcesTab />}
     </div>
   );
 }
 
-function DomainSection({ domain, items }) {
+function DomainSection({ domain, items, registeredPaths, onRegister }) {
   const color = DOMAIN_COLORS[domain];
   const count = items.length;
   const label = `${DOMAIN_LABELS[domain].toUpperCase()} — ${count} artefact${count !== 1 ? 's' : ''}`;
@@ -239,11 +268,193 @@ function DomainSection({ domain, items }) {
             gap: 16
           }}
         >
-          {items.map((it) => (
-            <BriefCard key={`${it.domain}/${it.filename}`} item={it} />
-          ))}
+          {items.map((it) => {
+            const isRegistered = registeredPaths?.has(it.path);
+            return (
+              <div key={`${it.domain}/${it.filename}`} style={{ position: 'relative' }}>
+                <BriefCard item={it} />
+                {!isRegistered && domain !== 'concepts' && (
+                  <button
+                    type="button"
+                    onClick={() => onRegister?.(it)}
+                    style={{
+                      position: 'absolute',
+                      top: 8,
+                      right: 8,
+                      padding: '2px 8px',
+                      borderRadius: 3,
+                      fontFamily: 'IBM Plex Mono',
+                      fontSize: 10,
+                      cursor: 'pointer',
+                      backgroundColor: '#0a0a0a',
+                      color: '#6b6b6b',
+                      border: '1px solid #2e2e2e',
+                    }}
+                  >
+                    Register
+                  </button>
+                )}
+              </div>
+            );
+          })}
         </div>
       )}
     </section>
+  );
+}
+
+
+function SourcesTab() {
+  const [sources, setSources] = useState({ status: 'loading', items: [] });
+  const [uploadDomain, setUploadDomain] = useState('energy');
+  const [uploading, setUploading] = useState(false);
+  const [uploadError, setUploadError] = useState(null);
+  const fileRef = useRef(null);
+
+  function load() {
+    setSources({ status: 'loading', items: [] });
+    fetch('/api/inputs')
+      .then((r) => r.json())
+      .then((body) => setSources({ status: 'ok', items: Array.isArray(body) ? body : [] }))
+      .catch((err) => setSources({ status: 'error', items: [], error: err.message }));
+  }
+
+  useEffect(() => { load(); }, []);
+
+  async function handleUpload(e) {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setUploading(true);
+    setUploadError(null);
+    try {
+      const fd = new FormData();
+      fd.append('file', file);
+      const res = await fetch(`/api/inputs/${uploadDomain}`, { method: 'POST', body: fd });
+      const body = await res.json();
+      if (!res.ok) throw new Error(body.detail ?? `HTTP ${res.status}`);
+      load();
+    } catch (err) {
+      setUploadError(err.message);
+    } finally {
+      setUploading(false);
+      e.target.value = '';
+    }
+  }
+
+  const grouped = UPLOAD_DOMAINS.reduce((acc, d) => {
+    acc[d] = sources.items.filter((s) => s.domain === d);
+    return acc;
+  }, {});
+
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 32 }}>
+      {/* Upload controls */}
+      <div style={{ display: 'flex', alignItems: 'center', gap: 12, flexWrap: 'wrap' }}>
+        <span style={{ fontFamily: 'IBM Plex Mono', fontSize: 11, color: '#6b6b6b', textTransform: 'uppercase', letterSpacing: '0.08em' }}>
+          domain:
+        </span>
+        {UPLOAD_DOMAINS.map((d) => {
+          const active = d === uploadDomain;
+          const color = DOMAIN_COLORS[d];
+          return (
+            <button
+              key={d} type="button" onClick={() => setUploadDomain(d)}
+              style={{
+                padding: '3px 8px', borderRadius: 3, cursor: 'pointer',
+                fontFamily: 'IBM Plex Mono', fontSize: 11,
+                backgroundColor: active ? color : 'transparent',
+                color: active ? '#0a0a0a' : color,
+                border: `1px solid ${color}`,
+                fontWeight: active ? 600 : 400,
+              }}
+            >
+              {DOMAIN_LABELS[d]}
+            </button>
+          );
+        })}
+        <button
+          type="button"
+          onClick={() => fileRef.current?.click()}
+          disabled={uploading}
+          style={{
+            marginLeft: 'auto',
+            padding: '3px 10px', borderRadius: 3, cursor: uploading ? 'not-allowed' : 'pointer',
+            fontFamily: 'IBM Plex Mono', fontSize: 11,
+            backgroundColor: 'transparent',
+            color: uploading ? '#3b3b3b' : '#9b9b9b',
+            border: '1px solid #2e2e2e',
+          }}
+        >
+          {uploading ? 'Uploading…' : '+ Upload Source'}
+        </button>
+        <input ref={fileRef} type="file" style={{ display: 'none' }} onChange={handleUpload} />
+      </div>
+
+      {uploadError && (
+        <div style={{
+          borderRadius: 3, border: '1px solid rgba(239,68,68,0.3)',
+          backgroundColor: 'rgba(239,68,68,0.08)', color: '#fca5a5',
+          fontFamily: 'IBM Plex Mono', fontSize: 12, padding: '8px 12px',
+        }}>
+          {uploadError}
+        </div>
+      )}
+
+      {sources.status === 'loading' && (
+        <div style={{ fontFamily: 'IBM Plex Sans', fontSize: 13, color: '#6b6b6b' }}>Loading sources…</div>
+      )}
+
+      {sources.status === 'ok' && (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 28 }}>
+          {UPLOAD_DOMAINS.map((d) => {
+            const color = DOMAIN_COLORS[d];
+            const items = grouped[d];
+            return (
+              <section key={d}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 12 }}>
+                  <span style={{ display: 'inline-block', width: 6, height: 6, borderRadius: '50%', backgroundColor: color, flexShrink: 0 }} />
+                  <span style={{ fontFamily: 'IBM Plex Mono', fontSize: 11, textTransform: 'uppercase', letterSpacing: '0.12em', color: '#9b9b9b' }}>
+                    {DOMAIN_LABELS[d]} — {items.length} file{items.length !== 1 ? 's' : ''}
+                  </span>
+                </div>
+                {items.length === 0 ? (
+                  <div style={{ fontFamily: 'IBM Plex Mono', fontSize: 12, color: '#3b3b3b', padding: '10px 14px', border: '1px solid #1e1e1e', borderRadius: 4 }}>
+                    No source files uploaded yet.
+                  </div>
+                ) : (
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+                    {items.map((src) => (
+                      <div
+                        key={src.path}
+                        style={{
+                          display: 'flex', alignItems: 'center', gap: 12,
+                          padding: '8px 12px', backgroundColor: '#111111',
+                          border: '1px solid #1e1e1e', borderRadius: 4,
+                        }}
+                      >
+                        <span style={{ fontFamily: 'IBM Plex Sans', fontSize: 13, color: '#c0c0c0', flex: 1 }}>
+                          {src.filename}
+                        </span>
+                        <span style={{ fontFamily: 'IBM Plex Mono', fontSize: 10, color: '#4b4b4b', flexShrink: 0 }}>
+                          {(src.size / 1024).toFixed(1)} KB
+                        </span>
+                        <a
+                          href={`/api/inputs/${src.domain}/${encodeURIComponent(src.filename)}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          style={{ fontFamily: 'IBM Plex Mono', fontSize: 11, color: '#6b6b6b', textDecoration: 'none' }}
+                        >
+                          open →
+                        </a>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </section>
+            );
+          })}
+        </div>
+      )}
+    </div>
   );
 }
