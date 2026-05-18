@@ -10,6 +10,14 @@ outputs/concepts/*
 outputs/registry.json
 outputs/ideas-workspace.json
 
+# User-uploaded research material — keep folder skeletons, ignore contents
+inputs/energy/*
+inputs/finance/*
+inputs/healthcare/*
+!inputs/energy/.gitkeep
+!inputs/finance/.gitkeep
+!inputs/healthcare/.gitkeep
+
 # Node
 node_modules/
 dist/
