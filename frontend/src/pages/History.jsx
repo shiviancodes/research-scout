@@ -306,6 +306,7 @@ function DomainSection({ domain, items, registeredPaths, onRegister }) {
 
 function SourcesTab() {
   const [sources, setSources] = useState({ status: 'loading', items: [] });
+  const [settings, setSettings] = useState({ energy: false, finance: false, healthcare: false });
   const [uploadDomain, setUploadDomain] = useState('energy');
   const [uploading, setUploading] = useState(false);
   const [uploadError, setUploadError] = useState(null);
@@ -313,10 +314,31 @@ function SourcesTab() {
 
   function load() {
     setSources({ status: 'loading', items: [] });
-    fetch('/api/inputs')
-      .then((r) => r.json())
-      .then((body) => setSources({ status: 'ok', items: Array.isArray(body) ? body : [] }))
+    Promise.all([
+      fetch('/api/inputs').then((r) => r.json()),
+      fetch('/api/inputs/settings').then((r) => r.json()),
+    ])
+      .then(([inputsBody, settingsBody]) => {
+        setSources({ status: 'ok', items: Array.isArray(inputsBody) ? inputsBody : [] });
+        setSettings(settingsBody);
+      })
       .catch((err) => setSources({ status: 'error', items: [], error: err.message }));
+  }
+
+  async function toggleDomain(domain) {
+    const next = !settings[domain];
+    try {
+      const res = await fetch('/api/inputs/settings', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ domain, active: next }),
+      });
+      const body = await res.json();
+      if (!res.ok) throw new Error(body.detail ?? `HTTP ${res.status}`);
+      setSettings(body);
+    } catch {
+      // silently ignore toggle errors — state stays unchanged
+    }
   }
 
   useEffect(() => { load(); }, []);
@@ -411,11 +433,27 @@ function SourcesTab() {
             const items = grouped[d];
             return (
               <section key={d}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 12 }}>
-                  <span style={{ display: 'inline-block', width: 6, height: 6, borderRadius: '50%', backgroundColor: color, flexShrink: 0 }} />
-                  <span style={{ fontFamily: 'IBM Plex Mono', fontSize: 11, textTransform: 'uppercase', letterSpacing: '0.12em', color: '#9b9b9b' }}>
-                    {DOMAIN_LABELS[d]} — {items.length} file{items.length !== 1 ? 's' : ''}
-                  </span>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                    <span style={{ display: 'inline-block', width: 6, height: 6, borderRadius: '50%', backgroundColor: color, flexShrink: 0 }} />
+                    <span style={{ fontFamily: 'IBM Plex Mono', fontSize: 11, textTransform: 'uppercase', letterSpacing: '0.12em', color: '#9b9b9b' }}>
+                      {DOMAIN_LABELS[d]} — {items.length} file{items.length !== 1 ? 's' : ''}
+                    </span>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => toggleDomain(d)}
+                    style={{
+                      padding: '2px 10px', borderRadius: 10, cursor: 'pointer',
+                      fontFamily: 'IBM Plex Mono', fontSize: 10,
+                      backgroundColor: settings[d] ? 'rgba(45,212,191,0.1)' : 'transparent',
+                      color: settings[d] ? '#2dd4bf' : '#4b4b4b',
+                      border: `1px solid ${settings[d] ? '#2dd4bf' : '#2e2e2e'}`,
+                      transition: 'all 0.15s',
+                    }}
+                  >
+                    {settings[d] ? 'active for next run' : 'inactive'}
+                  </button>
                 </div>
                 {items.length === 0 ? (
                   <div style={{ fontFamily: 'IBM Plex Mono', fontSize: 12, color: '#3b3b3b', padding: '10px 14px', border: '1px solid #1e1e1e', borderRadius: 4 }}>

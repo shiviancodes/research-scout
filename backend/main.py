@@ -25,6 +25,7 @@ if not WORKSPACE_PATH.exists():
     WORKSPACE_PATH.write_text('{"ideas": {}}', encoding="utf-8")
 
 INPUTS_DIR = PROJECT_ROOT / "inputs"
+SETTINGS_PATH = INPUTS_DIR / "settings.json"
 UPLOAD_DOMAINS = ("finance", "healthcare", "energy")
 DOMAINS = ("finance", "healthcare", "energy", "concepts")
 
@@ -150,6 +151,11 @@ class RegisterBody(BaseModel):
     tier: Literal["brief", "concept"]
     path: str
     sources: Optional[list[str]] = None
+
+
+class InputsSettingsPatch(BaseModel):
+    domain: str
+    active: bool
 
 
 def parse_filename(filename: str) -> dict:
@@ -412,6 +418,41 @@ def list_inputs():
                 }
             )
     return items
+
+
+_DEFAULT_SETTINGS = {"energy": False, "finance": False, "healthcare": False}
+
+
+@app.get("/api/inputs/settings")
+def get_inputs_settings():
+    if not SETTINGS_PATH.exists():
+        return dict(_DEFAULT_SETTINGS)
+    try:
+        return json.loads(SETTINGS_PATH.read_text(encoding="utf-8"))
+    except json.JSONDecodeError as exc:
+        raise HTTPException(
+            status_code=500,
+            detail=f"Settings file is not valid JSON: {exc.msg} at line {exc.lineno}.",
+        )
+
+
+@app.post("/api/inputs/settings")
+def update_inputs_settings(patch: InputsSettingsPatch):
+    if patch.domain not in UPLOAD_DOMAINS:
+        raise HTTPException(
+            status_code=400,
+            detail=f"domain must be one of: {', '.join(UPLOAD_DOMAINS)}.",
+        )
+    if SETTINGS_PATH.exists():
+        try:
+            settings = json.loads(SETTINGS_PATH.read_text(encoding="utf-8"))
+        except json.JSONDecodeError:
+            settings = dict(_DEFAULT_SETTINGS)
+    else:
+        settings = dict(_DEFAULT_SETTINGS)
+    settings[patch.domain] = patch.active
+    SETTINGS_PATH.write_text(json.dumps(settings, indent=2), encoding="utf-8")
+    return settings
 
 
 @app.post("/api/inputs/{domain}")
