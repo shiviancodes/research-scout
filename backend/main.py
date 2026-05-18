@@ -367,6 +367,8 @@ def register_output(body: RegisterBody):
         raise HTTPException(status_code=400, detail="path must resolve inside outputs/.")
     if OUTPUTS_DIR.resolve() not in resolved.parents:
         raise HTTPException(status_code=400, detail="path must resolve inside outputs/.")
+    if resolved.suffix.lower() != ".md" or not resolved.is_file():
+        raise HTTPException(status_code=400, detail="path must point to an existing .md file.")
 
     registry = _read_registry()
     ideas = registry.setdefault("ideas", [])
