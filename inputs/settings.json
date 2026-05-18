@@ -1,1 +1,5 @@
-{"energy": false, "finance": false, "healthcare": false}
+{
+  "energy": false,
+  "finance": false,
+  "healthcare": false
+}
