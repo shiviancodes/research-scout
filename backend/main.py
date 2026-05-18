@@ -126,7 +126,7 @@ app.add_middleware(
     CORSMiddleware,
     allow_origins=["http://localhost:5173"],
     allow_credentials=False,
-    allow_methods=["GET", "POST"],
+    allow_methods=["GET", "POST", "DELETE"],
     allow_headers=["*"],
 )
 
@@ -494,6 +494,18 @@ def get_input(domain: str, filename: str):
         media_type=mime or "application/octet-stream",
         headers={"Content-Disposition": f'inline; filename="{filename}"'},
     )
+
+
+@app.delete("/api/inputs/{domain}/{filename}")
+def delete_input(domain: str, filename: str):
+    if domain not in UPLOAD_DOMAINS:
+        raise HTTPException(status_code=404, detail=f"Unknown domain '{domain}'.")
+    domain_dir = INPUTS_DIR / domain
+    target = resolve_inside(domain_dir, filename)
+    if not target.is_file():
+        raise HTTPException(status_code=404, detail=f"File '{filename}' not found.")
+    target.unlink()
+    return {"deleted": True, "filename": filename}
 
 
 if __name__ == "__main__":
