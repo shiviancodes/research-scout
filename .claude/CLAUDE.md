@@ -1,26 +1,22 @@
 # research-scout
 
 A local research intelligence system that uses Claude Code sub-agents to autonomously
-research industries, score findings against a defined quality bar, and generate
-project briefs in the style of `docs/EXAMPLE_BRIEF_FORMAT.md`.
+research industries and generate raw findings that are aggregated into summaries.
 
 ## Folder structure
 
 - `.claude/` — Claude Code configuration.
   - `CLAUDE.md` — this file. Project-level operating instructions.
   - `agents/` — sub-agent definitions. One file per agent. Each file declares the
-    agent's role, sources, scoring criteria, and output format.
+    agent's role, sources, and output format.
 - `prompts/STANDARDS.md` — the quality bar. Every agent must read this before
-  proposing any idea and apply it when scoring findings.
+  producing any findings.
 - `outputs/` — agent-generated artefacts. Domain subfolders (`finance/`,
-  `healthcare/`, `energy/`) hold full briefs and raw findings. `concepts/` holds
-  shorter concept notes that did not reach full-brief threshold. `registry.json`
-  is the canonical index of every idea ever proposed and must be consulted by
-  the synthesis agent before any new idea is written, to prevent duplicates.
+  `healthcare/`, `energy/`) hold raw findings files. `summary/` holds aggregated
+  summaries. `registry.json` tracks registered ideas for reference.
 - `backend/` — FastAPI service that serves the `outputs/` directory as JSON.
 - `frontend/` — React + Vite dashboard that consumes the backend.
-- `docs/` — reference materials. `EXAMPLE_BRIEF_FORMAT.md` is the canonical
-  example of the brief format every full brief must match.
+- `docs/` — reference materials.
 
 ## Output naming convention
 
@@ -31,23 +27,20 @@ All output files use ISO week-based naming:
 Where:
 - `YYYY` is the four-digit year
 - `WNN` is the ISO week number, zero-padded (e.g. `W07`, `W23`)
-- `{type}` is one of: `brief`, `concept`, `findings`
+- `{type}` is one of: `findings`, `summary`
 
 Examples:
-- `outputs/finance/2026-W20-brief.md`
-- `outputs/healthcare/2026-W20-concept.md`
-- `outputs/energy/2026-W20-findings.md`
+- `outputs/finance/2026-W20-findings.md`
+- `outputs/summary/2026-W20-summary.md`
 
 ## Sub-agents
 
 Sub-agents live in `.claude/agents/`. The orchestrator dispatches domain agents
-(finance, healthcare, energy), which produce raw findings. The synthesis agent
-reads findings across domains, consults `outputs/registry.json` to avoid
-duplicates, scores against `prompts/STANDARDS.md`, and decides whether each
-candidate becomes a full brief, a concept note, or is discarded.
+(finance, healthcare, energy), which produce raw findings files. The synthesis
+agent reads findings across domains and produces an aggregated summary.
 
 ## Quality bar
 
-Every agent must read `prompts/STANDARDS.md` before scoring or writing. The
-standards define non-negotiables, positive signals, disqualifiers, and the
-required output format. Do not deviate.
+Every agent must read `prompts/STANDARDS.md` before producing findings. The
+standards define non-negotiables, positive signals, tagging conventions, and
+the required output format. Do not deviate.

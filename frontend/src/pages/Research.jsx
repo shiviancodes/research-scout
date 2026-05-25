@@ -1,5 +1,5 @@
 import { useEffect } from 'react';
-import IdeasTab from './IdeasTab.jsx';
+import IdeasTab from '../components/IdeasTab.jsx';
 
 export default function Research() {
   useEffect(() => {
