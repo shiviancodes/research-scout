@@ -1,6 +1,6 @@
 ---
 name: synthesis
-description: Aggregate findings files from the current run into a tagged summary.
+description: Aggregate findings files from the current run into a tagged summary. Use after all domain agents have completed their runs.
 model: claude-sonnet-4-6
 tools: Read, Write, Glob
 permissionMode: acceptEdits
