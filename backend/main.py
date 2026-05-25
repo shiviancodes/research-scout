@@ -3,6 +3,8 @@ import mimetypes
 import os
 import re
 from datetime import date, datetime
+from youtube_transcript_api import YouTubeTranscriptApi
+from youtube_transcript_api._errors import TranscriptsDisabled, NoTranscriptFound, VideoUnavailable
 from pathlib import Path
 from typing import Literal, Optional
 
@@ -118,6 +120,21 @@ def _safe_filename(name: str) -> str:
     name = re.sub(r"[/\\]", "", name)
     name = name.lstrip(".")
     return name or "upload"
+
+
+_YT_RE = re.compile(
+    r"(?:youtube\.com/watch\?v=|youtu\.be/|youtube\.com/embed/)"
+    r"([a-zA-Z0-9_-]{11})"
+)
+
+
+def _extract_video_id(url: str) -> str | None:
+    m = _YT_RE.search(url)
+    return m.group(1) if m else None
+
+
+class LinksPayload(BaseModel):
+    urls: list[str]
 
 
 app = FastAPI(title="research-scout API")
@@ -465,6 +482,13 @@ async def upload_input(domain: str, file: UploadFile = File(...)):
     domain_dir = INPUTS_DIR / domain
     domain_dir.mkdir(parents=True, exist_ok=True)
 
+    ext = Path(file.filename or "").suffix.lower()
+    if ext in {".ppt", ".pptx"}:
+        raise HTTPException(
+            status_code=400,
+            detail="PowerPoint files are not supported. Export your presentation as a PDF from PowerPoint or Google Slides, then upload the PDF.",
+        )
+
     safe_name = _safe_filename(file.filename or "upload")
     target = resolve_inside(domain_dir, safe_name)
     content = await file.read()
@@ -506,6 +530,51 @@ def delete_input(domain: str, filename: str):
         raise HTTPException(status_code=404, detail=f"File '{filename}' not found.")
     target.unlink()
     return {"deleted": True, "filename": filename}
+
+
+@app.post("/api/inputs/{domain}/links")
+async def add_links(domain: str, payload: LinksPayload):
+    if domain not in {"finance", "healthcare", "energy"}:
+        raise HTTPException(status_code=404, detail="Unknown domain")
+
+    domain_dir = INPUTS_DIR / domain
+    domain_dir.mkdir(parents=True, exist_ok=True)
+
+    results = []
+    regular_urls: list[str] = []
+
+    for url in payload.urls:
+        url = url.strip()
+        if not url:
+            continue
+        video_id = _extract_video_id(url)
+        if video_id:
+            try:
+                transcript_data = YouTubeTranscriptApi.get_transcript(video_id)
+                text = "\n".join(entry["text"] for entry in transcript_data)
+                out_path = domain_dir / f"{video_id}-transcript.md"
+                out_path.write_text(f"# YouTube Transcript\n\nSource: {url}\n\n{text}", encoding="utf-8")
+                results.append({"url": url, "status": "ok", "saved_as": out_path.name})
+            except (TranscriptsDisabled, NoTranscriptFound):
+                results.append({"url": url, "status": "error", "detail": "Transcript not available for this video."})
+            except VideoUnavailable:
+                results.append({"url": url, "status": "error", "detail": "Video unavailable."})
+            except Exception as exc:
+                results.append({"url": url, "status": "error", "detail": str(exc)})
+        else:
+            regular_urls.append(url)
+            results.append({"url": url, "status": "ok", "saved_as": "links.md"})
+
+    if regular_urls:
+        links_file = domain_dir / "links.md"
+        existing = links_file.read_text(encoding="utf-8") if links_file.exists() else ""
+        new_lines = "\n".join(regular_urls)
+        links_file.write_text(
+            (existing.rstrip("\n") + "\n" + new_lines).lstrip("\n"),
+            encoding="utf-8",
+        )
+
+    return {"results": results}
 
 
 if __name__ == "__main__":

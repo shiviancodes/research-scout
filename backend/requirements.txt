@@ -3,3 +3,4 @@ uvicorn
 python-multipart
 watchdog
 python-dotenv
+youtube-transcript-api
