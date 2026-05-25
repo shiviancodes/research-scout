@@ -533,9 +533,9 @@ def delete_input(domain: str, filename: str):
 
 
 @app.post("/api/inputs/{domain}/links")
-def add_links(domain: str, payload: LinksPayload):
-    if domain not in UPLOAD_DOMAINS:
-        raise HTTPException(status_code=400, detail=f"domain must be one of: {', '.join(sorted(UPLOAD_DOMAINS))}.")
+async def add_links(domain: str, payload: LinksPayload):
+    if domain not in {"finance", "healthcare", "energy"}:
+        raise HTTPException(status_code=404, detail="Unknown domain")
 
     domain_dir = INPUTS_DIR / domain
     domain_dir.mkdir(parents=True, exist_ok=True)
@@ -563,21 +563,16 @@ def add_links(domain: str, payload: LinksPayload):
                 results.append({"url": url, "status": "error", "detail": str(exc)})
         else:
             regular_urls.append(url)
+            results.append({"url": url, "status": "ok", "saved_as": "links.md"})
 
     if regular_urls:
         links_file = domain_dir / "links.md"
-        try:
-            existing = links_file.read_text(encoding="utf-8") if links_file.exists() else ""
-            new_lines = "\n".join(regular_urls)
-            links_file.write_text(
-                (existing.rstrip("\n") + "\n" + new_lines).lstrip("\n"),
-                encoding="utf-8",
-            )
-            for url in regular_urls:
-                results.append({"url": url, "status": "ok", "saved_as": "links.md"})
-        except Exception as exc:
-            for url in regular_urls:
-                results.append({"url": url, "status": "error", "detail": str(exc)})
+        existing = links_file.read_text(encoding="utf-8") if links_file.exists() else ""
+        new_lines = "\n".join(regular_urls)
+        links_file.write_text(
+            (existing.rstrip("\n") + "\n" + new_lines).lstrip("\n"),
+            encoding="utf-8",
+        )
 
     return {"results": results}
 
