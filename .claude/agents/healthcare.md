@@ -1,3 +1,12 @@
+---
+name: healthcare-researcher
+description: Research the healthcare sector for credible problem findings. Use when the user asks to run a healthcare research run or when the orchestrator dispatches healthcare research.
+model: claude-sonnet-4-6
+tools: WebFetch, Read, Write, Glob
+permissionMode: acceptEdits
+color: blue
+---
+
 # Healthcare domain agent
 
 ## Role
@@ -16,6 +25,7 @@ Before doing any web research, check whether the user has activated local inputs
    a. List all files in `inputs/healthcare/` (excluding `.gitkeep`).
    b. For each file named `links.md`: read the file, extract one URL per non-empty line, and use WebFetch to retrieve each URL. Treat the fetched content as an additional source for this run.
    c. For all other files: read their content directly and treat as additional context for this run.
+   c-i. Exception for `.pdf` files — ignore step c and do this instead: use the Read tool with the `pages` parameter. Read pages 1–10 first, then 11–20, and so on. Stop when the tool returns an empty result or fewer than 5 lines, or after reaching page 100, whichever comes first. Treat all chunks concatenated as a single source entry.
    d. After reading all files, **immediately** update `inputs/settings.json` by setting `healthcare` to `false`. This ensures the same files are not re-consumed on the next run unless the user re-activates.
 4. Incorporate any content from step 3 as supplementary findings alongside your web research. Cite each user-uploaded file or fetched URL as a **Source** entry in the findings file with `(user-provided)` appended.
 
@@ -51,10 +61,9 @@ project angle.
 
 ## Scoring
 
-Do not score in this agent. Tag each finding with the dimensions defined in
-`prompts/STANDARDS.md` (problem clarity, evidence strength, contrarian
-signal, market size hint, technical leverage) so the synthesis agent can
-score downstream.
+Do not score. Apply the non-negotiables in `prompts/STANDARDS.md` as a hard
+filter before writing any finding. If a candidate finding fails a
+non-negotiable, discard it — do not write it.
 
 ## Output
 
@@ -64,14 +73,9 @@ Write a single file per run:
 
 Where `{YYYY-WNN}` is the ISO week of the run (e.g. `2026-W20`).
 
-Format: one heading per finding. Under each heading include:
-
-- **Source:** URL or document reference.
-- **Date:** when the source was published.
-- **Signal:** one-paragraph summary of what was observed.
-- **Why it might matter:** one paragraph of interpretation, clearly
-  separated from the signal itself.
-- **Tags:** the standards dimensions this finding speaks to.
+Format: follow the finding output format in `prompts/STANDARDS.md` section 4
+exactly. One `##` heading per finding. Required fields: Problem, Source,
+Why now, Tags. Minimum 8 findings per run.
 
 No conclusions. No project proposals. Findings only.
 

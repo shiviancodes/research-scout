@@ -1,121 +1,101 @@
-# STANDARDS — The Quality Bar
+# STANDARDS — Findings Quality Bar
 
-Every agent in research-scout must read this document before scoring any
-finding or writing any brief. The standards are absolute. Do not relax
-them because a candidate idea is "interesting" or "topical".
-
-The reference brief `docs/EXAMPLE_BRIEF_FORMAT.md` is the canonical example.
-Match its depth, specificity, and tone.
+Every domain agent must read this document before writing any finding.
+Apply it as a hard filter. Do not surface a finding that fails a
+non-negotiable. Do not relax the bar because a topic is timely or
+interesting.
 
 ---
 
 ## 1. Non-negotiables
 
-A candidate idea must satisfy **every** item below. Failing any one is an
-automatic discard, regardless of how strong the rest looks.
+A finding must satisfy **every** item below. Failing any one is a discard.
 
-1. **A real, identifiable problem.** The brief names a specific person,
-   role, or organisation that has this problem today, and describes the
-   pain in concrete terms. "People struggle with X" is not a problem
-   statement. "Mid-cap regional banks running [system] hit [specific
-   failure mode] during [specific event]" is.
-2. **A primary source.** At least one citation must be a primary document
-   — a filing, a paper, a transcript, a regulation. Aggregator coverage
-   does not count.
-3. **A defensible "why now".** The brief explains what changed in the
-   last twelve months that makes this problem solvable or urgent now,
-   when it was not before. "AI is improving" is not a why-now.
-4. **Technical leverage.** The brief identifies a specific technical
-   capability — algorithm, dataset, regulatory change, infrastructure
-   shift — that gives a builder an asymmetric edge. Generic "use LLMs"
-   is not leverage.
-5. **A wedge.** The brief names the narrowest possible first customer or
-   use case the project would attack. No "platform plays". No
-   "horizontal infrastructure" without a vertical wedge.
+1. **A real, identifiable problem.**
+   Name a specific person, role, or organisation experiencing the problem
+   today. Describe the pain in concrete terms.
+   - PASS: "Community health centres using Epic's MyChart module cannot
+     reconcile same-day billing adjustments without manual intervention,
+     causing ~3-day revenue cycle delays. (Source: OIG Report OEI-09-23-00040)"
+   - FAIL: "Healthcare providers struggle with billing inefficiencies."
 
-## 2. Positive signals
+2. **A primary source.**
+   At least one citation must be a primary document. Primary means the
+   organisation or individual who generated the underlying data wrote or
+   published it directly.
+   - PASS: SEC 10-K filing, FDA guidance document, earnings call transcript,
+     peer-reviewed original research paper, SARB prudential circular,
+     NERSA tariff application, OIG report, CMS final rule.
+   - FAIL: TechCrunch article citing the filing. LinkedIn post summarising
+     the paper. "Industry analysts estimate..." without a named source.
+   - FAIL: A secondary outlet quoting the primary. Fetch the primary itself.
 
-These do not gate inclusion but materially raise the score. The synthesis
-agent should be able to point to specific evidence for each it claims.
+3. **A defensible why-now.**
+   Explain what changed in the last 12 months that makes this problem newly
+   visible, newly acute, or newly tractable. The change must be named and
+   dated.
+   - PASS: "CMS finalized the interoperability rule (CMS-0057-F, Jan 2024)
+     requiring payers to expose claims data via FHIR APIs by Jan 2027,
+     creating a hard deadline that did not exist before."
+   - FAIL: "AI is improving and making this easier."
+   - FAIL: "This has been a problem for years and is getting worse."
 
-- **Contrarian framing.** The brief argues for something that incumbents,
-  consensus media, or category analysts have explicitly dismissed or
-  ignored. Identify the consensus position and where it is wrong.
-- **Compounding data advantage.** Doing the work generates a proprietary
-  dataset that the next iteration of the product is better because of.
-- **Regulatory tailwind.** A recent or pending rule change shifts the
-  cost curve in the project's favour. Cite the rule.
-- **Asymmetric distribution.** A non-obvious channel — a specific
-  conference, a specific community, a specific procurement vehicle —
-  gives unusual reach.
-- **Founder-market fit hook.** The brief identifies the kind of operator
-  who would be uniquely qualified to attack this, and explains why.
-- **South African or broader African context** gives a unique and
-  underserved angle — a problem unsolved in SA but solved elsewhere, or
-  a problem uniquely acute in SA (grid instability, private health
-  insurance fragmentation, JSE microstructure, informal economy fintech)
-  counts as a strong positive signal.
+---
 
-## 3. Disqualifiers
+## 2. Disqualifiers
 
-These are automatic discards. No exceptions.
+These are automatic discards regardless of how strong the rest looks.
 
 - **No primary source.** All citations are secondary or aggregator.
-- **Saturated category.** The space already has well-funded incumbents
-  attacking the exact same wedge with the exact same approach.
-- **Regulatory blocker.** A current rule makes the proposed approach
-  illegal in the wedge market, and there is no credible path to change.
-- **Solved by an obvious adjacent player.** A hyperscaler, an EHR
-  vendor, a core banking system, or an ISO/RTO would ship the feature
-  within twelve months as a side effect of their roadmap.
-- **Founder economics broken.** Even at full success, the unit economics
-  cannot support a venture-scale or sustainable-cashflow outcome.
-- **Pure trend chasing.** The brief's why-now is "[hot topic] is hot".
+- **Pure trend chasing.** The why-now is "[topic] is trending" with no
+  concrete, dated change.
+- **Already a commodity.** The exact problem is already publicly solved by
+  a well-documented, widely-adopted tool or workflow.
 
-## 4. Scoring dimensions
+---
 
-The synthesis agent scores each candidate on these five axes. Use them
-to tag findings and to justify tier decisions in the brief itself.
+## 3. Positive signal tags
 
-- **Problem clarity.** How specifically is the problem named?
-- **Evidence strength.** How primary, recent, and converging are the
-  sources?
-- **Contrarian signal.** How far is this from consensus?
-- **Market size hint.** Is there evidence the wedge expands into a real
-  market, even if today's wedge is small?
-- **Technical leverage.** How asymmetric is the proposed capability?
+These do not gate inclusion. Tag each finding with any that apply. They
+help the human reader prioritise which findings to investigate further.
 
-## 5. Required output format — full brief
+- `contrarian` — the finding points to something incumbents, analysts, or
+  consensus media have explicitly dismissed or ignored.
+- `sa-angle` — the problem is uniquely acute or uniquely unsolved in South
+  Africa (grid instability, private health insurance fragmentation, JSE
+  microstructure, informal economy fintech, SAHPRA delays).
+- `regulatory-shift` — a named rule change or pending regulation is
+  directly driving the problem or creating a new constraint.
+- `data-moat` — whoever addresses the problem will accumulate data that
+  is hard to replicate.
 
-Every Tier 1 brief must contain these sections, in this order, matching
-the depth and specificity of the reference briefs in `docs/`:
+---
 
-1. `# {PROJECT_NAME} — {one-line descriptor}`
-2. `## Master Overview Document`
-3. `## Vision` — what the project does and for whom, in operator-readable terms.
-4. `## Why Existing Approaches Fail` — the consensus position and where it breaks.
-5. `## System Architecture` — components, data flow, interfaces.
-6. `## Components` — each named component, its responsibility, its inputs and outputs.
-7. `## Algorithm Inventory` — the specific algorithmic or methodological choices.
-8. `## Data Sources and Cost Reality` — exactly which data, where from, what it costs.
-9. `## Anchor Wedge` — the narrowest first customer or use case.
-10. `## What Makes This Commercially Valuable` — the path from wedge to category.
-11. `## What This Is Not` — the explicit non-goals.
-12. `## Sources` — every citation, with URL and access date.
+## 4. Finding output format
 
-## 6. Required output format — concept note
+Each finding in the output file must contain these fields, in this order:
 
-Concept notes are shorter. Required sections:
+```
+## {Short descriptive title}
 
-1. `# {PROJECT_NAME} — concept`
-2. `## Problem`
-3. `## Why now`
-4. `## Hypothesis`
-5. `## What would make this a full brief`
-6. `## Sources`
+**Problem:** One to three sentences. Named role/org + specific pain +
+concrete consequence.
 
-## 7. Tone
+**Source:** Full citation — URL or document reference + publication date.
 
-Operator-grade. No marketing language. No hedging adjectives ("powerful",
-"innovative", "cutting-edge"). Concrete nouns, specific numbers, named
-entities. If a sentence could appear in a generic pitch deck, rewrite it.
+**Why now:** One to three sentences. Named change + date + effect.
+
+**Tags:** Space-separated list from section 3. Omit if none apply.
+```
+
+Minimum 8 findings per domain per run. If fewer than 8 credible findings
+exist, note the gap explicitly rather than padding with weak findings.
+
+---
+
+## 5. Tone
+
+Operator-grade. Concrete nouns. Specific numbers. Named entities. No
+marketing adjectives ("innovative", "powerful", "cutting-edge"). No
+hedging ("may", "could potentially", "might be relevant to"). If a
+sentence could appear in a generic pitch deck, rewrite it or cut it.
