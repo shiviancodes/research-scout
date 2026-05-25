@@ -27,6 +27,7 @@ Write a single summary file:
 
 Format:
 
+```
 # Run Summary — {YYYY-WNN}
 
 ## Domains covered
@@ -43,5 +44,6 @@ A finding may appear under multiple tags.
 ## SA-angle findings
 List only findings tagged `sa-angle`, with their problem statement
 reproduced verbatim.
+```
 
 Do not editorialize. Do not add commentary beyond the structure above.
