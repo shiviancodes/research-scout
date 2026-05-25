@@ -43,15 +43,17 @@ export default function SourcesPanel() {
   }
 
   async function handleUpload(domain, e) {
-    const file = e.target.files?.[0];
-    if (!file) return;
+    const files = Array.from(e.target.files ?? []);
+    if (files.length === 0) return;
     setUploadState((s) => ({ ...s, [domain]: { uploading: true, error: null } }));
     try {
-      const fd = new FormData();
-      fd.append('file', file);
-      const res = await fetch(`/api/inputs/${domain}`, { method: 'POST', body: fd });
-      const body = await res.json();
-      if (!res.ok) throw new Error(body.detail ?? `HTTP ${res.status}`);
+      for (const file of files) {
+        const fd = new FormData();
+        fd.append('file', file);
+        const res = await fetch(`/api/inputs/${domain}`, { method: 'POST', body: fd });
+        const body = await res.json();
+        if (!res.ok) throw new Error(body.detail ?? `HTTP ${res.status}`);
+      }
       load();
       setUploadState((s) => ({ ...s, [domain]: { uploading: false, error: null } }));
     } catch (err) {
@@ -127,7 +129,7 @@ export default function SourcesPanel() {
                 >
                   {us.uploading ? 'Uploading…' : '+ PDF'}
                 </button>
-                <input ref={(el) => { fileRefs.current[d] = el; }} type="file" accept=".pdf,.md,.txt" style={{ display: 'none' }} onChange={(e) => handleUpload(d, e)} />
+                <input ref={(el) => { fileRefs.current[d] = el; }} type="file" accept=".pdf,.md,.txt" multiple style={{ display: 'none' }} onChange={(e) => handleUpload(d, e)} />
                 <button
                   type="button"
                   onClick={() => setLinksModal(d)}
