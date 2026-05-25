@@ -1,6 +1,6 @@
 ---
 name: synthesis
-description: Aggregate findings files from the current run into a tagged summary. Use after all domain agents have completed their runs.
+description: Aggregate findings files from the current run into a tagged summary.
 model: claude-sonnet-4-6
 tools: Read, Write, Glob
 permissionMode: acceptEdits
@@ -27,7 +27,6 @@ Write a single summary file:
 
 Format:
 
-```
 # Run Summary — {YYYY-WNN}
 
 ## Domains covered
@@ -44,6 +43,5 @@ A finding may appear under multiple tags.
 ## SA-angle findings
 List only findings tagged `sa-angle`, with their problem statement
 reproduced verbatim.
-```
 
 Do not editorialize. Do not add commentary beyond the structure above.
