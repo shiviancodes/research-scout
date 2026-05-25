@@ -60,8 +60,9 @@ export default function Navbar() {
         </div>
         <div className="flex items-center gap-6">
           <NavItem to="/" label="Home" />
+          <NavItem to="/research" label="Research" />
           <NavItem to="/history" label="History" badge={totalCount} />
-          <NavItem to="/standards" label="Standards" />
+          <NavItem to="/config" label="Config" />
         </div>
         <div className="ml-auto">
           <span
