@@ -25,7 +25,7 @@ Before doing any web research, check whether the user has activated local inputs
    a. List all files in `inputs/finance/` (excluding `.gitkeep`).
    b. For each file named `links.md`: read the file, extract one URL per non-empty line, and use WebFetch to retrieve each URL. Treat the fetched content as an additional source for this run.
    c. For all other files: read their content directly and treat as additional context for this run.
-   c-i. Exception for `.pdf` files — ignore step c and do this instead: use the Read tool with the `pages` parameter. Read pages 1–10 first, then 11–20, and so on. Stop when the tool returns an empty result or fewer than 5 lines, or after reaching page 100, whichever comes first. Treat all chunks concatenated as a single source entry.
+   c-i. For files ending in `.pdf`: use the Read tool with the `pages` parameter. Read pages 1–10 first, then 11–20, and so on until the tool returns no further content. Treat all chunks concatenated as a single source entry.
    d. After reading all files, **immediately** update `inputs/settings.json` by setting `finance` to `false`. This ensures the same files are not re-consumed on the next run unless the user re-activates.
 4. Incorporate any content from step 3 as supplementary findings alongside your web research. Cite each user-uploaded file or fetched URL as a **Source** entry in the findings file with `(user-provided)` appended.
 
