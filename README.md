@@ -62,28 +62,40 @@ Open the URL printed by the start script (default: **http://localhost:5173**)
 ## Architecture
 
 ```mermaid
-graph TB
-    User["You<br/>Upload sources<br/>Arm domains"]
+flowchart TB
+    subgraph input["Input"]
+        User["You<br/>Upload sources<br/>Arm domains"]
+    end
     
-    Dashboard["React Dashboard<br/>Frontend @ :5173<br/>- Home run + sources<br/>- Config agent editor<br/>- History findings<br/>- Research workspace"]
+    subgraph frontend["Frontend"]
+        Dashboard["React Dashboard @ :5173<br/>Home | Config | History | Research"]
+    end
     
-    API["FastAPI Backend<br/>Backend @ :8766<br/>- /api/inputs<br/>- /api/agents<br/>- /api/run"]
+    subgraph backend["Backend"]
+        API["FastAPI @ :8766<br/>/api/inputs | /api/agents | /api/run"]
+    end
     
-    Agents["Claude Code Agents<br/>Orchestrator → Domain Agents<br/>→ Synthesis<br/>Apply STANDARDS.md filter"]
+    subgraph processing["AI Processing"]
+        Agents["Claude Code Agents<br/>Orchestrator → Domain Agents<br/>→ Synthesis"]
+    end
     
-    Storage["Local Storage<br/>inputs/ - Your uploads<br/>outputs/ - Findings<br/>.claude/agents/ - Definitions"]
+    subgraph storage["Storage"]
+        Files["inputs/ - Your uploads<br/>outputs/ - Findings<br/>.claude/agents/ - Definitions"]
+    end
     
-    Findings["Findings Output<br/>Per domain + summary<br/>Problem | Source |<br/>Why now | Tags"]
+    subgraph output["Output"]
+        Findings["Findings<br/>Problem | Source | Why now | Tags"]
+    end
     
     User -->|Upload PDFs<br/>YouTube links| Dashboard
-    Dashboard -->|Copy prompt| Agents
     Dashboard -->|API calls| API
+    Dashboard -->|Copy prompt| Agents
     API -->|Serves| Dashboard
-    Agents -->|Read armed sources| Storage
+    Agents -->|Read armed sources| Files
     Agents -->|Web search| Agents
-    Agents -->|Write| Storage
-    Storage -->|Findings| Findings
-    API -->|Read| Storage
+    Agents -->|Write| Files
+    Files -->|Serve| API
+    Files -->|Generate| Findings
     Dashboard -->|View| Findings
 ```
 
