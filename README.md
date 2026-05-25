@@ -63,7 +63,7 @@ Open the URL printed by the start script (default: **http://localhost:5173**)
 <img width="616" height="348" alt="image" src="https://github.com/user-attachments/assets/7b33c4fd-8f0d-40af-a44a-8b3ea6c191f9" />
 </div>
 
-## Architecture
+## Architecture 
 
 ```mermaid
 flowchart TB
