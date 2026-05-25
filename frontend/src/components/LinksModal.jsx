@@ -77,7 +77,7 @@ export default function LinksModal({ domain, onClose, onSaved }) {
     setError(null);
   }
 
-  const hasFailures = results && results.some((r) => r.status === 'error');
+  const allFailed = results && results.length > 0 && results.every((r) => r.status === 'error');
 
   return (
     <div style={OVERLAY} onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}>
@@ -99,9 +99,9 @@ export default function LinksModal({ domain, onClose, onSaved }) {
           <>
             <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
               <span style={LABEL}>Results</span>
-              {results.map((r) => (
+              {results.map((r, i) => (
                 <div
-                  key={r.url}
+                  key={i}
                   style={{
                     display: 'flex', alignItems: 'flex-start', gap: 8,
                     padding: '7px 10px',
@@ -136,7 +136,7 @@ export default function LinksModal({ domain, onClose, onSaved }) {
             </div>
 
             <div style={{ display: 'flex', gap: 10, justifyContent: 'flex-end' }}>
-              {hasFailures && (
+              {allFailed && (
                 <button
                   type="button" onClick={handleRetry}
                   style={{
@@ -151,7 +151,7 @@ export default function LinksModal({ domain, onClose, onSaved }) {
               )}
               <button
                 type="button"
-                onClick={() => { if (results.some((r) => r.status === 'ok')) onSaved(); onClose(); }}
+                onClick={() => { onSaved(); onClose(); }}
                 style={{
                   padding: '7px 16px', borderRadius: 3, cursor: 'pointer',
                   fontFamily: 'IBM Plex Mono', fontSize: 12,
@@ -196,11 +196,9 @@ export default function LinksModal({ domain, onClose, onSaved }) {
               <button
                 type="button" onClick={onClose} disabled={submitting}
                 style={{
-                  padding: '7px 16px', borderRadius: 3,
-                  cursor: submitting ? 'not-allowed' : 'pointer',
+                  padding: '7px 16px', borderRadius: 3, cursor: 'pointer',
                   fontFamily: 'IBM Plex Mono', fontSize: 12,
-                  backgroundColor: 'transparent',
-                  color: submitting ? '#3b3b3b' : '#6b6b6b',
+                  backgroundColor: 'transparent', color: '#6b6b6b',
                   border: '1px solid #2e2e2e',
                 }}
               >
