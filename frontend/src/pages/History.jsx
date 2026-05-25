@@ -3,6 +3,7 @@ import BriefCard, { DOMAIN_COLORS, DOMAIN_LABELS } from '../components/BriefCard
 import RegisterModal from '../components/RegisterModal.jsx';
 import RegistryMap from '../components/RegistryMap.jsx';
 import IdeasTab from './IdeasTab.jsx';
+import LinksModal from '../components/LinksModal.jsx';
 
 const DOMAIN_ORDER = ['finance', 'healthcare', 'energy', 'concepts'];
 const UPLOAD_DOMAINS = ['energy', 'finance', 'healthcare'];
@@ -308,6 +309,7 @@ function SourcesTab() {
   const [sources, setSources] = useState({ status: 'loading', items: [] });
   const [settings, setSettings] = useState({ energy: false, finance: false, healthcare: false });
   const [uploadState, setUploadState] = useState({});
+  const [linksModal, setLinksModal] = useState(null);
   const fileRefs = useRef({});
 
   function load() {
@@ -380,6 +382,13 @@ function SourcesTab() {
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 28 }}>
+      {linksModal && (
+        <LinksModal
+          domain={linksModal}
+          onClose={() => setLinksModal(null)}
+          onSaved={() => { load(); setLinksModal(null); }}
+        />
+      )}
       {sources.status === 'loading' && (
         <div style={{ fontFamily: 'IBM Plex Sans', fontSize: 13, color: '#6b6b6b' }}>Loading sources…</div>
       )}
@@ -423,14 +432,28 @@ function SourcesTab() {
                     border: '1px solid #2e2e2e',
                   }}
                 >
-                  {us.uploading ? 'Uploading…' : '+ Add file'}
+                  {us.uploading ? 'Uploading…' : '+ Upload PDF'}
                 </button>
                 <input
                   ref={(el) => { fileRefs.current[d] = el; }}
                   type="file"
+                  accept=".pdf,.md,.txt"
                   style={{ display: 'none' }}
                   onChange={(e) => handleUpload(d, e)}
                 />
+                <button
+                  type="button"
+                  onClick={() => setLinksModal(d)}
+                  style={{
+                    padding: '3px 10px', borderRadius: 3, cursor: 'pointer',
+                    fontFamily: 'IBM Plex Mono', fontSize: 10,
+                    backgroundColor: 'transparent',
+                    color: '#6b6b6b',
+                    border: '1px solid #2e2e2e',
+                  }}
+                >
+                  + Add links
+                </button>
                 <button
                   type="button"
                   onClick={() => toggleDomain(d)}
