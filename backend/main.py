@@ -557,7 +557,8 @@ def add_links(domain: str, payload: LinksPayload):
         video_id = _extract_video_id(url)
         if video_id:
             try:
-                transcript_data = YouTubeTranscriptApi().get_transcript(video_id)
+                api = YouTubeTranscriptApi()
+                transcript_data = api.get_transcript(video_id, languages=['en', 'en-US'])
                 text = "\n".join(entry["text"] for entry in transcript_data)
                 out_path = domain_dir / f"{video_id}-transcript.md"
                 out_path.write_text(f"# YouTube Transcript\n\nSource: {url}\n\n{text}", encoding="utf-8")
