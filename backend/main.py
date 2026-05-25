@@ -559,7 +559,7 @@ def add_links(domain: str, payload: LinksPayload):
             try:
                 api = YouTubeTranscriptApi()
                 transcript_obj = api.fetch(video_id)
-                text = "\n".join(entry["text"] for entry in transcript_obj.entries)
+                text = "\n".join(snippet.text for snippet in transcript_obj)
                 out_path = domain_dir / f"{video_id}-transcript.md"
                 out_path.write_text(f"# YouTube Transcript\n\nSource: {url}\n\n{text}", encoding="utf-8")
                 results.append({"url": url, "status": "ok", "saved_as": out_path.name})
