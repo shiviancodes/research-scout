@@ -98,7 +98,7 @@ function RegistryTable({ ideas }) {
           color: '#6b6b6b'
         }}
       >
-        No ideas have been registered yet. The synthesis agent will append entries here as it produces briefs and concept notes.
+        No ideas have been registered yet. Upload and register findings to add entries here.
       </div>
     );
   }
@@ -133,7 +133,6 @@ function RegistryTable({ ideas }) {
             const color = DOMAIN_COLORS[idea.domain] ?? '#52525b';
             const filename = idea.path ? idea.path.split('/').pop() : null;
             const rowBg = index % 2 === 0 ? '#111111' : '#0d0d0d';
-            const isBrief = idea.tier === 'brief' || idea.tier === 'project-brief';
 
             return (
               <tr key={idea.slug} style={{ backgroundColor: rowBg }}>
@@ -167,10 +166,9 @@ function RegistryTable({ ideas }) {
                       fontSize: 10,
                       padding: '2px 7px',
                       borderRadius: 3,
-                      backgroundColor: isBrief ? color : 'transparent',
-                      color: isBrief ? '#0a0a0a' : color,
-                      border: isBrief ? 'none' : `1px solid ${color}`,
-                      fontWeight: isBrief ? 500 : 400
+                      backgroundColor: 'transparent',
+                      color,
+                      border: `1px solid ${color}`
                     }}
                   >
                     {idea.tier}

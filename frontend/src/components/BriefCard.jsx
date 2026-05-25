@@ -16,8 +16,6 @@ export const DOMAIN_LABELS = {
 };
 
 export const TYPE_LABELS = {
-  'project-brief': 'project-brief',
-  concept: 'concept',
   findings: 'findings',
   synthesis: 'synthesis',
   unknown: 'unknown'
@@ -79,7 +77,7 @@ export default function BriefCard({ item, preview }) {
     return () => { cancelled = true; };
   }, [item.domain, item.filename, preview]);
 
-  const isFilledType = item.type === 'project-brief' || item.type === 'findings' || item.type === 'synthesis';
+  const isFilledType = item.type === 'findings' || item.type === 'synthesis';
 
   return (
     <Link

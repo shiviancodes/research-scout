@@ -20,26 +20,14 @@ agent's job — see `synthesis.md`.
 Before doing any web research, check whether the user has activated local inputs for this domain:
 
 1. Read `inputs/settings.json`.
-2. If `healthcare` is `false` (or the file is missing), proceed directly to `## Sources` and run a full web research pass.
-3. If `healthcare` is `true`, this is an **upload-first run**. Uploaded content is your primary research material. Follow steps 3a–3h before doing any web research.
-
+2. If `healthcare` is `false` (or the file is missing), skip to `## Sources` and proceed with web research only.
+3. If `healthcare` is `true`:
    a. List all files in `inputs/healthcare/` (excluding `.gitkeep`).
-   b. For each file named `links.md`: read the file, extract one URL per non-empty line, and use WebFetch to retrieve each URL. Treat each fetched page as a primary source document for this run.
-   c. For all other non-PDF files: read their content directly and treat as a primary source document.
-   d. For `.pdf` files: use the Read tool with the `pages` parameter. Read pages 1–10 first, then 11–20, and so on. Stop when the tool returns an empty result or fewer than 5 lines, or after reaching page 100, whichever comes first. Treat all chunks concatenated as a single source entry.
-   e. **Immediately** update `inputs/settings.json` by setting `healthcare` to `false`.
-   f. Mine every uploaded document for problem signals. For each candidate finding extracted from the uploaded material:
-      - Name the specific person, role, or organisation experiencing the problem.
-      - Identify the primary source. If the uploaded file is itself a primary document (regulatory filing, company report, original research paper, earnings transcript), it counts as the primary source — cite it with `(user-provided)` appended. If it is a secondary summary, fetch the underlying primary source via WebFetch before writing the finding.
-      - Apply the non-negotiables from `prompts/STANDARDS.md`. Discard any finding that fails.
-   g. Exhaust the uploaded material completely before moving to the web.
-   h. After extracting all findings from uploaded content, do a **targeted supplementary web pass**. This pass has three purposes only:
-      - Fetch primary sources for any uploaded-material finding that still lacks one.
-      - Find corroborating data or named entities that strengthen a finding from the uploads.
-      - Follow specific threads the uploaded material opened but did not close (e.g., a regulation cited but not fetched, a company named but not investigated).
-      Do **not** introduce findings on topics unrelated to the uploaded material during this supplementary pass.
-
-4. Cite each user-uploaded file or fetched URL as a **Source** entry in the findings file. Append `(user-provided)` to any citation that originates from an uploaded file or a link extracted from an uploaded `links.md`.
+   b. For each file named `links.md`: read the file, extract one URL per non-empty line, and use WebFetch to retrieve each URL. Treat the fetched content as an additional source for this run.
+   c. For all other files: read their content directly and treat as additional context for this run.
+   c-i. Exception for `.pdf` files — ignore step c and do this instead: use the Read tool with the `pages` parameter. Read pages 1–10 first, then 11–20, and so on. Stop when the tool returns an empty result or fewer than 5 lines, or after reaching page 100, whichever comes first. Treat all chunks concatenated as a single source entry.
+   d. After reading all files, **immediately** update `inputs/settings.json` by setting `healthcare` to `false`. This ensures the same files are not re-consumed on the next run unless the user re-activates.
+4. Incorporate any content from step 3 as supplementary findings alongside your web research. Cite each user-uploaded file or fetched URL as a **Source** entry in the findings file with `(user-provided)` appended.
 
 ## Sources
 

@@ -30,6 +30,9 @@ INPUTS_DIR = PROJECT_ROOT / "inputs"
 SETTINGS_PATH = INPUTS_DIR / "settings.json"
 UPLOAD_DOMAINS = ("finance", "healthcare", "energy")
 DOMAINS = ("finance", "healthcare", "energy", "concepts")
+AGENTS_DIR = PROJECT_ROOT / ".claude" / "agents"
+DEFAULTS_DIR = PROJECT_ROOT / "defaults" / "agents"
+AGENT_NAMES = ("finance", "healthcare", "energy", "synthesis", "orchestrator")
 
 TYPE_MAP = {
     "brief": "project-brief",
@@ -135,6 +138,10 @@ def _extract_video_id(url: str) -> str | None:
 
 class LinksPayload(BaseModel):
     urls: list[str]
+
+
+class AgentContentPayload(BaseModel):
+    content: str
 
 
 app = FastAPI(title="research-scout API")
@@ -550,8 +557,9 @@ def add_links(domain: str, payload: LinksPayload):
         video_id = _extract_video_id(url)
         if video_id:
             try:
-                transcript_data = YouTubeTranscriptApi.get_transcript(video_id)
-                text = "\n".join(entry["text"] for entry in transcript_data)
+                api = YouTubeTranscriptApi()
+                transcript_obj = api.fetch(video_id)
+                text = "\n".join(snippet.text for snippet in transcript_obj)
                 out_path = domain_dir / f"{video_id}-transcript.md"
                 out_path.write_text(f"# YouTube Transcript\n\nSource: {url}\n\n{text}", encoding="utf-8")
                 results.append({"url": url, "status": "ok", "saved_as": out_path.name})
@@ -580,6 +588,37 @@ def add_links(domain: str, payload: LinksPayload):
                 results.append({"url": url, "status": "error", "detail": str(exc)})
 
     return {"results": results}
+
+
+@app.get("/api/agents/{name}")
+def get_agent(name: str):
+    if name not in AGENT_NAMES:
+        raise HTTPException(status_code=404, detail=f"Unknown agent '{name}'.")
+    path = AGENTS_DIR / f"{name}.md"
+    if not path.exists():
+        raise HTTPException(status_code=404, detail=f"Agent file '{name}.md' not found.")
+    return {"name": name, "content": path.read_text(encoding="utf-8")}
+
+
+@app.post("/api/agents/{name}")
+def save_agent(name: str, payload: AgentContentPayload):
+    if name not in AGENT_NAMES:
+        raise HTTPException(status_code=400, detail=f"Unknown agent '{name}'.")
+    path = AGENTS_DIR / f"{name}.md"
+    path.write_text(payload.content, encoding="utf-8")
+    return {"name": name, "path": str(path.relative_to(PROJECT_ROOT))}
+
+
+@app.post("/api/agents/{name}/restore")
+def restore_agent(name: str):
+    if name not in AGENT_NAMES:
+        raise HTTPException(status_code=400, detail=f"Unknown agent '{name}'.")
+    default_path = DEFAULTS_DIR / f"{name}.md"
+    if not default_path.exists():
+        raise HTTPException(status_code=404, detail=f"No default found for '{name}'.")
+    content = default_path.read_text(encoding="utf-8")
+    (AGENTS_DIR / f"{name}.md").write_text(content, encoding="utf-8")
+    return {"name": name, "content": content}
 
 
 if __name__ == "__main__":
