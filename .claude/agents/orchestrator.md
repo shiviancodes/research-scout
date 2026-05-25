@@ -1,3 +1,12 @@
+---
+name: orchestrator
+description: Coordinate a research run. Use when the user asks to run research across one or all domains.
+model: claude-sonnet-4-6
+tools: Read, Task
+permissionMode: default
+color: cyan
+---
+
 # Orchestrator agent
 
 ## Role
