@@ -9,15 +9,9 @@
 research-scout turns Claude Code into a private research analyst. Upload your own research materials (PDFs, YouTube transcripts, articles) to control the evidence base. Point agents at a domain (Finance, Healthcare, Energy) and they'll surface real, named problems backed by primary sources — then search the web to validate and extend. You get a structured findings summary entirely under your control.
 
 <div align="center">
-  <img width="800" height="450" alt="research-scout" src="https://github.com/user-attachments/assets/f5348519-e80f-41fd-977b-2a8fd44b3ce8" />
+<img width="1265" height="694" alt="Screenshot 2026-05-25 213234" src="https://github.com/user-attachments/assets/e975cd84-bc66-4425-8a66-48e101ec95fa" />
 </div>
 
-
-## Prerequisites
-
-- Python 3.11+
-- Node.js 18+
-- [Claude Code CLI](https://claude.ai/code)
 
 ## Quickstart
 
