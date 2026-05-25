@@ -386,7 +386,7 @@ function SourcesTab() {
         <LinksModal
           domain={linksModal}
           onClose={() => setLinksModal(null)}
-          onSaved={() => { load(); setLinksModal(null); }}
+          onSaved={load}
         />
       )}
       {sources.status === 'loading' && (
