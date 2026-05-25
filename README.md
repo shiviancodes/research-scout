@@ -12,141 +12,6 @@ research-scout turns Claude Code into a private research analyst. Upload your ow
   <img width="800" height="450" alt="research-scout" src="https://github.com/user-attachments/assets/f5348519-e80f-41fd-977b-2a8fd44b3ce8" />
 </div>
 
-## How it works
-
-### Data Flow
-
-```
-┌──────────────────┐
-│   You: Upload    │  PDFs, markdown, YouTube links per domain
-│   & Arm Sources  │  (sources stored in inputs/{domain}/)
-└────────┬─────────┘
-         │
-         ▼
-┌──────────────────────┐
-│ Research Dashboard   │  • Select domain & run
-│ (React + Vite)       │  • Copy prompt to Claude Code
-└────────┬─────────────┘
-         │
-         ▼
-┌──────────────────────────────────────────────────────┐
-│ Claude Code Agents (.claude/agents/)                 │
-│                                                      │
-│  Orchestrator → Domain Agents (Finance/Healthcare/  │
-│                 Energy) → Synthesis Agent            │
-│                                                      │
-│  Apply STANDARDS.md filter → Surface credible       │
-│  findings (real problem + primary source +          │
-│  defensible why-now)                                │
-└────────┬─────────────────────────────────────────────┘
-         │
-         ▼
-┌──────────────────────────────────┐
-│ Output Files (outputs/)          │
-│ • {domain}/{YYYY-WNN}-findings  │
-│ • summary/{YYYY-WNN}-summary.md │
-└────────┬────────────────────────┘
-         │
-         ▼
-┌──────────────────────────┐
-│ FastAPI Backend          │  Serves outputs/ and agent
-│ (backend/main.py)        │  definitions as JSON API
-└────────┬─────────────────┘
-         │
-         ▼
-┌────────────────────────────────────┐
-│ Dashboard reads API & displays     │
-│ • Findings grouped by tag          │
-│ • Run history                      │
-│ • Source materials                 │
-└────────────────────────────────────┘
-```
-
-### System Architecture
-
-```
-Frontend (React)          Backend (FastAPI)        Storage
-┌─────────────────┐      ┌──────────────────┐     ┌──────────────────┐
-│ Home            │      │ /api/inputs      │     │ inputs/
-│ • Run control   │◄────►│ • Upload files   │────►│ • energy/
-│ • Sources panel │      │ • Delete files   │     │ • finance/
-│                 │      │ • Arm/disarm     │     │ • healthcare/
-│ Config          │      │                  │     │
-│ • Agent editor  │      │ /api/agents      │     │ outputs/
-│ • Standards ref │      │ • Get/post agent │────►│ • findings/
-│                 │      │ • Restore        │     │ • summary/
-│ History         │      │                  │     │
-│ • Findings view │      │ /api/run         │     │ .claude/agents/
-│ • Search        │      │ • List runs      │     │ • orchestrator
-│                 │      │ • Get findings   │     │ • domain agents
-│ Research        │      │                  │     │ • synthesis
-│ • Findings      │      │                  │     │
-│   workspace     │      │                  │     │
-└─────────────────┘      └──────────────────┘     └──────────────────┘
-  http://localhost:5173     http://localhost:8766    Local filesystem
-```
-
-### Research Workflow
-
-```
-1. UPLOAD SOURCES          2. ARM MATERIALS           3. RUN RESEARCH
-┌──────────────────────┐  ┌──────────────────────┐  ┌──────────────────┐
-│ Sources Panel        │  │ Sources Panel        │  │ Dashboard        │
-│ (Home sidebar)       │  │ (Home sidebar)       │  │ Home page        │
-│                      │  │                      │  │                  │
-│ + PDF                │  │ Per-domain toggle:   │  │ Select domain    │
-│   Drag & drop        │  │ ☐ Energy             │  │ Click "Run"      │
-│   Multiple files     │  │ ☑ Finance (armed)    │  │                  │
-│                      │  │ ☐ Healthcare        │  │ Copy prompt      │
-│ + Links              │  │                      │  │ Paste to Claude  │
-│   YouTube URLs       │  │ "Armed sources will  │  │ Code terminal    │
-│   Auto-transcript    │  │  be primary on next  │  │                  │
-│                      │  │  run"                │  │ Agents run       │
-│ Clear                │  │                      │  │ automatically    │
-│   Bulk delete        │  │ Clear (remove all)   │  │                  │
-└──────────────────────┘  └──────────────────────┘  └──────────────────┘
-        ↓                          ↓                          ↓
-   inputs/finance/            settings.json             orchestrator.md
-   • report.pdf                (domain toggles)         dispatches agents
-   • slides.pptx
-   • youtube-xxx.md
-```
-
-## What it produces
-
-Every run produces a **findings file** per domain:
-
-```
-outputs/energy/2026-W21-findings.md
-outputs/finance/2026-W21-findings.md
-outputs/healthcare/2026-W21-findings.md
-```
-
-Plus an **aggregated summary:**
-
-```
-outputs/summary/2026-W21-summary.md
-```
-
-Each finding contains:
-- **Problem:** Real, named people/roles experiencing pain + concrete consequence
-- **Source:** Primary document (YouTube transcript, regulatory filing, PDF, research paper)
-- **Why now:** Defensible change in the last 12 months + specific date
-- **Tags:** positive signals (sa-angle, regulatory-shift, contrarian, data-moat)
-
-Example finding:
-
-> **Eskom Bars Licensed Traders from Virtual Wheeling Despite Live NERSA Licences**
->
-> **Problem:** Traders holding NERSA-issued electricity trading licences — including Discovery Green (CEO Andre Nepgen, on record) and others — cannot contract directly as counterparty on Eskom's virtual wheeling product. Eskom's Acting GM for ED Exchange stated: "we are not dealing with traders in this virtual wheeling setup at all." Without trader participation, the aggregation model required to bring virtual wheeling to SMEs cannot function.
->
-> **Source:** EE Business Intelligence webinar "Virtual Wheeling: Pilot to Platform" (user-provided YouTube transcript), NERSA public licensing data
->
-> **Why now:** Eskom launched virtual wheeling as a live commercial product in early 2025. NERSA issued electricity trading licences to multiple parties including Discovery Green. The South African wholesale electricity market (SAWEM) is scheduled for April 2026 launch, forcing resolution of trader roles before market commencement.
->
-> **Tags:** sa-angle regulatory-shift contrarian
-
-The quality bar is entirely yours: edit `prompts/STANDARDS.md` directly or use the **Config → Standards** tab in the dashboard.
 
 ## Prerequisites
 
@@ -199,6 +64,34 @@ Open the URL printed by the start script (default: **http://localhost:5173**)
    - Synthesis agent aggregates findings into a summary
 8. **Refresh the History tab** to see new findings files
 9. **(Optional) Edit agents** — Config page lets you adjust agent definitions, edit Standards, and restore to factory defaults
+
+## Architecture
+
+```mermaid
+graph TB
+    User["You<br/>Upload sources<br/>Arm domains"]
+    
+    Dashboard["React Dashboard<br/>Frontend @ :5173<br/>- Home run + sources<br/>- Config agent editor<br/>- History findings<br/>- Research workspace"]
+    
+    API["FastAPI Backend<br/>Backend @ :8766<br/>- /api/inputs<br/>- /api/agents<br/>- /api/run"]
+    
+    Agents["Claude Code Agents<br/>Orchestrator → Domain Agents<br/>→ Synthesis<br/>Apply STANDARDS.md filter"]
+    
+    Storage["Local Storage<br/>inputs/ - Your uploads<br/>outputs/ - Findings<br/>.claude/agents/ - Definitions"]
+    
+    Findings["Findings Output<br/>Per domain + summary<br/>Problem | Source |<br/>Why now | Tags"]
+    
+    User -->|Upload PDFs<br/>YouTube links| Dashboard
+    Dashboard -->|Copy prompt| Agents
+    Dashboard -->|API calls| API
+    API -->|Serves| Dashboard
+    Agents -->|Read armed sources| Storage
+    Agents -->|Web search| Agents
+    Agents -->|Write| Storage
+    Storage -->|Findings| Findings
+    API -->|Read| Storage
+    Dashboard -->|View| Findings
+```
 
 ## Customising your quality bar
 
