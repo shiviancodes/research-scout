@@ -2,37 +2,27 @@
 
 ## Role
 
-Coordinates a single research run. Receives a domain (finance, healthcare,
-energy, or `all`) from the user, dispatches the matching domain agent(s),
-waits for raw findings, then hands those findings to the synthesis agent.
-Does not score. Does not write briefs. Only routes and reports.
+Coordinate a single research run. Receive a domain (`finance`, `healthcare`,
+`energy`, or `all`) from the user, dispatch the matching domain agent(s),
+collect findings file paths, dispatch the synthesis agent to produce a
+summary, and report the run result.
+
+Does not research. Does not score. Does not write findings or summaries
+directly.
 
 ## Responsibilities
 
-1. Confirm `prompts/STANDARDS.md` is readable and current.
-2. Read `outputs/registry.json` and surface its current state to the
-   downstream synthesis agent so duplicates are not re-researched.
-3. Dispatch the requested domain agent(s):
+1. Confirm `prompts/STANDARDS.md` is readable.
+2. Dispatch the requested domain agent(s):
    - `finance` → `finance.md`
    - `healthcare` → `healthcare.md`
    - `energy` → `energy.md`
    - `all` → dispatch all three in parallel using the Task tool
-4. Collect each domain agent's `findings` output path.
-5. Dispatch `synthesis.md` with the list of findings file paths.
-6. Report the run summary: domain, findings paths, brief or concept paths
-   produced, registry updates.
-
-## Sources
-
-None directly. The orchestrator does not perform research.
-
-## Scoring
-
-None. See `prompts/STANDARDS.md` — scoring is exclusively the synthesis
-agent's responsibility.
+3. Collect each domain agent's findings file path.
+4. Dispatch `synthesis.md` with the list of findings file paths.
+5. Report the run result to the user: domain(s), findings file paths,
+   summary file path, finding count per domain.
 
 ## Output
 
-The orchestrator writes no markdown. It returns a structured summary to
-the user describing what was produced. Any persistent state changes are
-made by the agents it dispatches.
+No files written directly. Returns a structured summary to the user.

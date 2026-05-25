@@ -51,10 +51,9 @@ project angle.
 
 ## Scoring
 
-Do not score in this agent. Tag each finding with the dimensions defined in
-`prompts/STANDARDS.md` (problem clarity, evidence strength, contrarian
-signal, market size hint, technical leverage) so the synthesis agent can
-score downstream.
+Do not score. Apply the non-negotiables in `prompts/STANDARDS.md` as a hard
+filter before writing any finding. If a candidate finding fails a
+non-negotiable, discard it — do not write it.
 
 ## Output
 
@@ -64,14 +63,9 @@ Write a single file per run:
 
 Where `{YYYY-WNN}` is the ISO week of the run (e.g. `2026-W20`).
 
-Format: one heading per finding. Under each heading include:
-
-- **Source:** URL or document reference.
-- **Date:** when the source was published.
-- **Signal:** one-paragraph summary of what was observed.
-- **Why it might matter:** one paragraph of interpretation, clearly
-  separated from the signal itself.
-- **Tags:** the standards dimensions this finding speaks to.
+Format: follow the finding output format in `prompts/STANDARDS.md` section 4
+exactly. One `##` heading per finding. Required fields: Problem, Source,
+Why now, Tags. Minimum 8 findings per run.
 
 No conclusions. No project proposals. Findings only.
 
