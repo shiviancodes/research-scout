@@ -76,6 +76,13 @@ export default function SourcesPanel() {
     }
   }
 
+  async function handleClearDomain(domain) {
+    const items = grouped[domain] || [];
+    for (const item of items) {
+      await handleDelete(domain, item.filename);
+    }
+  }
+
   const grouped = UPLOAD_DOMAINS.reduce((acc, d) => {
     acc[d] = sources.items.filter((s) => s.domain === d);
     return acc;
@@ -144,6 +151,15 @@ export default function SourcesPanel() {
                 >
                   {armed ? 'Armed ✓' : 'Arm'}
                 </button>
+                {items.length > 0 && (
+                  <button
+                    type="button"
+                    onClick={() => handleClearDomain(d)}
+                    style={{ padding: '2px 8px', borderRadius: 3, cursor: 'pointer', fontFamily: 'IBM Plex Mono', fontSize: 10, backgroundColor: 'transparent', color: '#6b6b6b', border: '1px solid #2e2e2e' }}
+                  >
+                    Clear
+                  </button>
+                )}
               </div>
             </div>
 
