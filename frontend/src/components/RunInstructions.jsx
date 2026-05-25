@@ -10,19 +10,20 @@ function getISOWeek(d) {
 }
 
 function buildPrompt(domains) {
-  const list = domains.map((d) => DOMAIN_LABELS[d] ?? d).join(', ');
+  const names = domains.map((d) => DOMAIN_LABELS[d] ?? d);
+  const argStr = domains.length === 3 ? 'all' : domains.join(', ');
   return [
-    `Run the orchestrator agent for the following industries: ${list}.`,
+    `Run a research run for: ${names.join(', ')}.`,
     '',
-    'Workflow:',
-    '1. Read .claude/agents/orchestrator.md for routing rules.',
-    '2. Read prompts/STANDARDS.md before scoring any finding.',
-    '3. Read outputs/registry.json to avoid duplicating existing ideas.',
-    `4. Dispatch each domain agent (${domains.join(', ')}); collect their findings files.`,
-    '5. Dispatch the synthesis agent over those findings.',
-    '6. Apply the three-tier output system (full brief / concept note / discard).',
-    '7. Append new entries to outputs/registry.json.',
-    '8. Report the run summary: domain, findings paths, briefs produced, registry updates.'
+    '1. Read .claude/agents/orchestrator.md.',
+    `2. Dispatch the domain agent(s): ${argStr}.`,
+    '   Each agent reads prompts/STANDARDS.md before writing any finding.',
+    '   Non-negotiables are hard filters — discard any finding that fails.',
+    '   Each agent writes: outputs/{domain}/{YYYY-WNN}-findings.md',
+    '   Minimum 8 findings per domain.',
+    '3. After all domain agents complete, dispatch the synthesis agent.',
+    '   Synthesis writes: outputs/summary/{YYYY-WNN}-summary.md',
+    '4. Report: domains run · findings file paths · finding count per domain · summary path.',
   ].join('\n');
 }
 
