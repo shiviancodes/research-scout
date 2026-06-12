@@ -2,11 +2,10 @@ import { useEffect, useState } from 'react';
 
 const TABS = [
   { key: 'standards', label: 'Standards', getUrl: '/api/standards', postUrl: '/api/standards', restoreUrl: null },
-  { key: 'finance', label: 'Finance Agent', getUrl: '/api/agents/finance', postUrl: '/api/agents/finance', restoreUrl: '/api/agents/finance/restore' },
-  { key: 'healthcare', label: 'Healthcare Agent', getUrl: '/api/agents/healthcare', postUrl: '/api/agents/healthcare', restoreUrl: '/api/agents/healthcare/restore' },
-  { key: 'energy', label: 'Energy Agent', getUrl: '/api/agents/energy', postUrl: '/api/agents/energy', restoreUrl: '/api/agents/energy/restore' },
+  { key: 'scout', label: 'Scout Agent', getUrl: '/api/agents/scout', postUrl: '/api/agents/scout', restoreUrl: '/api/agents/scout/restore' },
+  { key: 'deep-dive', label: 'Deep-Dive Agent', getUrl: '/api/agents/deep-dive', postUrl: '/api/agents/deep-dive', restoreUrl: '/api/agents/deep-dive/restore' },
+  { key: 'red-team', label: 'Red-Team Agent', getUrl: '/api/agents/red-team', postUrl: '/api/agents/red-team', restoreUrl: '/api/agents/red-team/restore' },
   { key: 'synthesis', label: 'Synthesis Agent', getUrl: '/api/agents/synthesis', postUrl: '/api/agents/synthesis', restoreUrl: '/api/agents/synthesis/restore' },
-  { key: 'orchestrator', label: 'Orchestrator Agent', getUrl: '/api/agents/orchestrator', postUrl: '/api/agents/orchestrator', restoreUrl: '/api/agents/orchestrator/restore' },
 ];
 
 const TAB_STYLE_BASE = {

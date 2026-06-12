@@ -9,8 +9,14 @@ const DOMAIN_ORDER = ['finance', 'healthcare', 'energy'];
 
 export default function Home() {
   const [selected, setSelected] = useState([]);
+  const [focus, setFocus] = useState('');
   const [state, setState] = useState({ status: 'loading' });
   const [sourcesOpen, setSourcesOpen] = useState(false);
+
+  function handleSelect(next) {
+    setSelected(next);
+    setFocus('');
+  }
 
   useEffect(() => {
     document.title = 'Research Scout';
@@ -61,8 +67,33 @@ export default function Home() {
         </header>
 
         <section style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-          <IndustrySelector selected={selected} onChange={setSelected} />
-          <RunInstructions selected={selected} />
+          <IndustrySelector selected={selected} onChange={handleSelect} />
+          {selected.length === 1 && (
+            <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+              <span style={{ fontFamily: 'IBM Plex Mono', fontSize: 11, color: '#6b6b6b', textTransform: 'uppercase', letterSpacing: '0.08em' }}>
+                focus:
+              </span>
+              <input
+                type="text"
+                value={focus}
+                onChange={(e) => setFocus(e.target.value)}
+                placeholder="grid storage, municipal billing (optional)"
+                style={{
+                  flex: 1,
+                  maxWidth: 420,
+                  padding: '6px 10px',
+                  borderRadius: 4,
+                  border: '1px solid #2e2e2e',
+                  backgroundColor: '#111111',
+                  color: '#f0f0f0',
+                  fontFamily: 'IBM Plex Mono',
+                  fontSize: 13,
+                  outline: 'none'
+                }}
+              />
+            </div>
+          )}
+          <RunInstructions selected={selected} focus={focus} />
         </section>
 
         {/* Latest findings */}
