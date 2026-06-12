@@ -6,7 +6,7 @@
 [![Claude Code](https://img.shields.io/badge/Claude-Code-orange.svg)](https://claude.ai/code)
 [![React](https://img.shields.io/badge/React-Vite-61dafb.svg)](https://vitejs.dev)
 
-research-scout turns Claude Code into a private research analyst. Upload your own research materials (PDFs, YouTube transcripts, articles) to control the evidence base. Point agents at a domain (Finance, Healthcare, Energy) and they'll surface real, named problems backed by primary sources — then search the web to validate and extend. You get a structured findings summary entirely under your control.
+research-scout turns Claude Code into a private research analyst. Arm your own research materials (PDFs, YouTube transcripts, articles) to control the evidence base, then run a single-domain pipeline that scouts primary sources by modality, chases each one down, and adversarially verifies it before it survives. Point it at a domain (Finance, Healthcare, Energy) with optional focus keywords and you get a structured, primary-sourced findings summary entirely under your control — weak findings get killed, not padded.
 
 <div align="center">
 <img width="1265" height="694" alt="Screenshot 2026-05-25 213234" src="https://github.com/user-attachments/assets/e975cd84-bc66-4425-8a66-48e101ec95fa" />
@@ -57,23 +57,20 @@ make stop    # when done
 
 Open the URL printed by the start script (default: **http://localhost:5173**)
 
-## Running a research session
+Research runs are driven by the `/research` slash command in Claude Code — **one domain per run**.
 
-1. **Open the dashboard** at `http://localhost:5173`
-2. **Upload research materials** (right sidebar, Sources panel):
-   - Drag PDFs, markdown, text files
-   - Paste YouTube links → system auto-fetches transcripts
-   - See all materials in the Sources panel organized by domain
-3. **Arm your materials** — toggle per-domain to control which files feed the next run
-   - Marked as "primary research material on the next run"
-4. **Run research** — select a domain and click "Run"
-5. **Copy the prompt** shown in the dashboard
-6. **Open Claude Code** terminal at project root and run: `claude`
-7. **Paste and run** — agents execute automatically:
-   - Domain agent(s) research against your armed sources + targeted web
-   - Synthesis agent aggregates findings into a summary
-8. **Refresh the History tab** to see new findings files
-9. **(Optional) Edit agents** — Config page lets you adjust agent definitions, edit Standards, and restore to factory defaults
+1. **(Optional) Arm uploads** — drop materials into `inputs/<domain>/` and set that domain's flag to `true` in `inputs/settings.json` (or use the dashboard Sources panel). Armed material becomes an extra scout modality for the next run, and the flag resets once consumed.
+2. **Open Claude Code** at the project root and run: `claude`
+3. **Run the pipeline:**
+   ```
+   /research energy "grid storage, municipal billing"
+   ```
+   - First argument is the domain — `finance` | `healthcare` | `energy`.
+   - Second argument (optional) is **focus keywords** that steer scouts and triage.
+   - Append `dry` for a cheap 2-scout / 2-candidate end-to-end test.
+4. **Watch the stages report** — scouts (parallel, one per modality) → triage → deep-dive → red-team (kills weak candidates) → assemble → synthesis. The orchestrator prints candidate counts per modality, kills with reasons, and the survivor count.
+5. **View results** — open the dashboard at `http://localhost:5173` and refresh the History tab, or read `outputs/<domain>/<YYYY-WNN>-findings.md` directly.
+6. **(Optional) Edit agents** — the Config page lets you adjust the stage agent definitions, edit Standards, and restore factory defaults.
 
 
 <div align="center">
@@ -85,7 +82,7 @@ Open the URL printed by the start script (default: **http://localhost:5173**)
 ```mermaid
 flowchart TB
     subgraph input["Input"]
-        User["You<br/>Upload sources<br/>Arm domains"]
+        User["You<br/>Arm uploads (inputs/settings.json)<br/>Run /research domain focus"]
     end
     
     subgraph frontend["Frontend"]
@@ -96,27 +93,34 @@ flowchart TB
         API["FastAPI @ :8766<br/>/api/inputs | /api/agents | /api/run"]
     end
     
-    subgraph processing["AI Processing"]
-        Agents["Claude Code Agents<br/>Orchestrator → Domain Agents<br/>→ Synthesis"]
+    subgraph processing["AI Processing — /research pipeline (single domain)"]
+        direction TB
+        Scouts["Phase A · Scouts<br/>parallel, one per modality<br/>regulatory · earnings · audit · tenders · armed-uploads"]
+        Triage["Phase B · Triage<br/>dedup → rank → top 10"]
+        DeepDive["Phase C · Deep-dive<br/>one subagent per candidate"]
+        RedTeam["Phase D · Red-team<br/>adversarial verify · KILL by default"]
+        Assemble["Phase E · Assemble<br/>findings + registry + run log"]
+        Synthesis["Synthesis<br/>aggregate summary"]
+        Scouts --> Triage --> DeepDive --> RedTeam --> Assemble --> Synthesis
     end
     
     subgraph storage["Storage"]
-        Files["inputs/ - Your uploads<br/>outputs/ - Findings<br/>.claude/agents/ - Definitions"]
+        Files["inputs/ - armed uploads<br/>outputs/ - findings + summaries<br/>findings-registry.json - cross-run memory<br/>.claude/agents/ - stage definitions"]
     end
     
     subgraph output["Output"]
         Findings["Findings<br/>Problem | Source | Why now | Tags"]
     end
     
-    User -->|Upload PDFs<br/>YouTube links| Dashboard
+    User -->|Arm uploads| Dashboard
+    User -->|Run /research| Scouts
     Dashboard -->|API calls| API
-    Dashboard -->|Copy prompt| Agents
     API -->|Serves| Dashboard
-    Agents -->|Read armed sources| Files
-    Agents -->|Web search| Agents
-    Agents -->|Write| Files
+    Files -->|Exclusion list| Scouts
+    Scouts -->|Read armed sources + web| Files
+    Assemble -->|Write findings + registry| Files
     Files -->|Serve| API
-    Files -->|Generate| Findings
+    Assemble -->|Generate| Findings
     Dashboard -->|View| Findings
 ```
 
@@ -132,37 +136,55 @@ Edit directly or use **Config → Standards** in the dashboard. Changes take eff
 
 ## Key features
 
+### Single-domain pipeline
+One run researches one domain through six stages: parallel **scouts** (one per source modality) → **triage** (dedup + rank to a shortlist) → **deep-dive** (one subagent per candidate, chasing the primary source) → **red-team** (adversarial verification) → **assemble** → **synthesis**. Driven by the `/research` slash command.
+
+### Adversarial verification
+The red-team stage independently tries to kill every candidate and **defaults to KILL when uncertain**. Thin weeks (1–2 survivors) are expected output, not failure — better empty than generic. Weak findings are dropped, never padded.
+
+### Cross-run memory
+Every candidate that reaches the red-team — survived or killed — is recorded in `outputs/findings-registry.json`. The next run builds an **exclusion list** from it so scouts don't resurface the same problems week over week.
+
+### Focus keywords
+The optional second argument to `/research` steers scouts and triage toward a theme (e.g. `"grid storage, municipal billing"`) without hard-filtering — a strong off-focus signal still beats a weak on-focus one.
+
 ### Armed-Source Workflow
-Upload your own research materials (PDFs, YouTube transcripts, markdown). Toggle per-domain which materials are "armed" (primary research). Run agents against materials you've curated and chosen.
+Arm your own research materials (PDFs, YouTube transcripts, markdown) per domain via `inputs/settings.json` (or the dashboard Sources panel). When armed, your uploads become an extra scout modality for the next run, and the flag resets once consumed.
 
 ### Config Page
 Edit agent definitions in-browser:
-- **Standards** — view quality bar reference
-- **Finance, Healthcare, Energy** — edit domain agents
-- **Synthesis, Orchestrator** — edit orchestration logic
+- **Standards** — view/edit the quality bar reference
+- **Scout, Deep-dive, Red-team, Synthesis** — edit the stage agent definitions
 - **Save** posts changes; **Restore-to-Default** pulls factory copies
 
-### Findings Format
-Standardised four-field findings (Problem, Source, Why now, Tags) make output actionable and machine-readable.
+### Findings Format & lint hook
+Standardised four-field findings (Problem, Source, Why now, Tags) make output actionable and machine-readable. A `PostToolUse` hook (`scripts/lint_findings.py`) checks the format mechanically on every findings-file write.
 
 ### Run Summary
-Synthesis agent aggregates findings by domain and tag. No scoring, no tiers — humans decide what to investigate.
+The synthesis agent aggregates findings by tag. No scoring, no tiers — humans decide what to investigate.
 
 ## Project structure
 
 ```
-.claude/agents/             Agent definitions (orchestrator, domain, synthesis)
-.claude/projects/           Agent planning docs
+.claude/agents/             Stage agent definitions (scout, deep-dive, red-team, synthesis)
+.claude/commands/           /research pipeline orchestrator
+.claude/settings.json       PostToolUse lint hook on findings writes
 backend/                    FastAPI - serves outputs/ + agent/source endpoints
 frontend/                   React + Vite dashboard
-outputs/                    Generated artefacts (gitignored folder skeletons)
-  ├─ energy/                Domain findings per run
+scripts/                    Pipeline helpers (lint_findings, update_registry, log_run,
+                            check_links, validate_domain)
+outputs/                    Generated artefacts
+  ├─ energy/                Per-domain weekly findings (+ .run/ scratch dirs)
   ├─ finance/
   ├─ healthcare/
-  └─ summary/               Aggregated summaries per run
-prompts/                    STANDARDS.md — quality bar
-defaults/agents/            Factory copies of agent definitions (restore-to-default)
-inputs/                     User-uploaded research materials per domain
+  ├─ summary/               Aggregated summaries per run
+  ├─ findings-registry.json Cross-run finding memory (survivors + kills)
+  └─ run-log.jsonl          Per-run telemetry
+prompts/
+  ├─ STANDARDS.md           Quality bar
+  └─ sources/               Per-domain source packs, by scout modality
+defaults/agents/            Factory copies of stage agents (restore-to-default)
+inputs/                     Armed research materials per domain (+ settings.json arming)
   ├─ energy/
   ├─ finance/
   └─ healthcare/
