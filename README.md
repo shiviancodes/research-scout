@@ -12,7 +12,6 @@ research-scout turns Claude Code into a private research analyst. Upload your ow
 <img width="1265" height="694" alt="Screenshot 2026-05-25 213234" src="https://github.com/user-attachments/assets/e975cd84-bc66-4425-8a66-48e101ec95fa" />
 </div>
 
-
 ## Prerequisites
 
 - Python 3.11+ and Node 18+
@@ -76,7 +75,12 @@ Open the URL printed by the start script (default: **http://localhost:5173**)
 8. **Refresh the History tab** to see new findings files
 9. **(Optional) Edit agents** — Config page lets you adjust agent definitions, edit Standards, and restore to factory defaults
 
-## Architecture
+
+<div align="center">
+<img width="616" height="348" alt="image" src="https://github.com/user-attachments/assets/7b33c4fd-8f0d-40af-a44a-8b3ea6c191f9" />
+</div>
+
+## Architecture 
 
 ```mermaid
 flowchart TB
