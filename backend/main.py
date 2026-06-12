@@ -32,7 +32,8 @@ UPLOAD_DOMAINS = ("finance", "healthcare", "energy")
 DOMAINS = ("finance", "healthcare", "energy", "concepts")
 AGENTS_DIR = PROJECT_ROOT / ".claude" / "agents"
 DEFAULTS_DIR = PROJECT_ROOT / "defaults" / "agents"
-AGENT_NAMES = ("finance", "healthcare", "energy", "synthesis", "orchestrator")
+AGENT_NAMES = ("scout", "deep-dive", "red-team", "synthesis")
+FINDINGS_REGISTRY_PATH = OUTPUTS_DIR / "findings-registry.json"
 
 TYPE_MAP = {
     "brief": "project-brief",
@@ -267,6 +268,22 @@ def get_registry():
         raise HTTPException(
             status_code=500,
             detail=f"Registry file is not valid JSON: {exc.msg} at line {exc.lineno}.",
+        )
+
+
+@app.get("/api/findings-registry")
+def get_findings_registry():
+    if not FINDINGS_REGISTRY_PATH.exists():
+        raise HTTPException(
+            status_code=404,
+            detail=f"Findings registry not found at {FINDINGS_REGISTRY_PATH.relative_to(PROJECT_ROOT)}.",
+        )
+    try:
+        return json.loads(FINDINGS_REGISTRY_PATH.read_text(encoding="utf-8"))
+    except json.JSONDecodeError as exc:
+        raise HTTPException(
+            status_code=500,
+            detail=f"Findings registry is not valid JSON: {exc.msg} at line {exc.lineno}.",
         )
 
 
