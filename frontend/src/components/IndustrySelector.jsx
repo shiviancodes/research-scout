@@ -4,18 +4,8 @@ import { DOMAIN_COLORS, DOMAIN_LABELS } from './BriefCard.jsx';
 const INDUSTRIES = ['finance', 'healthcare', 'energy'];
 
 export default function IndustrySelector({ selected, onChange, counts = {} }) {
-  const allSelected = INDUSTRIES.every((d) => selected.includes(d));
-
   function toggle(domain) {
-    if (selected.includes(domain)) {
-      onChange(selected.filter((d) => d !== domain));
-    } else {
-      onChange([...selected, domain]);
-    }
-  }
-
-  function toggleAll() {
-    onChange(allSelected ? [] : [...INDUSTRIES]);
+    onChange(selected.includes(domain) ? [] : [domain]);
   }
 
   return (
@@ -30,7 +20,7 @@ export default function IndustrySelector({ selected, onChange, counts = {} }) {
           letterSpacing: '0.08em'
         }}
       >
-        industries:
+        industry:
       </span>
       {INDUSTRIES.map((d) => (
         <DomainChip
@@ -43,7 +33,6 @@ export default function IndustrySelector({ selected, onChange, counts = {} }) {
           onClick={() => toggle(d)}
         />
       ))}
-      <AllChip allSelected={allSelected} onClick={toggleAll} />
     </div>
   );
 }
@@ -106,36 +95,6 @@ function DomainChip({ domain: _domain, active, color, label, count, onClick }) {
       >
         {count}
       </span>
-    </button>
-  );
-}
-
-function AllChip({ allSelected, onClick }) {
-  const [pressed, setPressed] = useState(false);
-
-  return (
-    <button
-      type="button"
-      onClick={onClick}
-      onMouseDown={(e) => { e.preventDefault(); setPressed(true); }}
-      onMouseUp={() => setPressed(false)}
-      onMouseLeave={() => setPressed(false)}
-      style={{
-        padding: '6px 16px',
-        borderRadius: 4,
-        fontFamily: 'IBM Plex Mono',
-        fontSize: 13,
-        cursor: 'pointer',
-        backgroundColor: allSelected ? '#f0f0f0' : 'transparent',
-        color: allSelected ? '#0a0a0a' : '#6b6b6b',
-        border: allSelected ? '1px solid #f0f0f0' : '1px solid #2e2e2e',
-        fontWeight: allSelected ? 500 : 400,
-        outline: 'none',
-        transform: pressed ? 'scale(0.97)' : 'none',
-        transition: 'all 150ms ease'
-      }}
-    >
-      All
     </button>
   );
 }

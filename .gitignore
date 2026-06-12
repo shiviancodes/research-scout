@@ -9,6 +9,8 @@ outputs/concepts/*
 !outputs/concepts/.gitkeep
 outputs/registry.json
 outputs/ideas-workspace.json
+outputs/findings-registry.json
+outputs/run-log.jsonl
 
 # User-uploaded research material — keep folder skeletons, ignore contents
 inputs/energy/*

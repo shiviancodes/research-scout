@@ -1,5 +1,4 @@
 import { useState } from 'react';
-import { DOMAIN_LABELS } from './BriefCard.jsx';
 
 function getISOWeek(d) {
   const date = new Date(d);
@@ -9,22 +8,9 @@ function getISOWeek(d) {
   return 1 + Math.round(((date - week1) / 86400000 - 3 + ((week1.getDay() + 6) % 7)) / 7);
 }
 
-function buildPrompt(domains) {
-  const names = domains.map((d) => DOMAIN_LABELS[d] ?? d);
-  const argStr = domains.length === 3 ? 'all' : domains.join(', ');
-  return [
-    `Run a research run for: ${names.join(', ')}.`,
-    '',
-    '1. Read .claude/agents/orchestrator.md.',
-    `2. Dispatch the domain agent(s): ${argStr}.`,
-    '   Each agent reads prompts/STANDARDS.md before writing any finding.',
-    '   Non-negotiables are hard filters — discard any finding that fails.',
-    '   Each agent writes: outputs/{domain}/{YYYY-WNN}-findings.md',
-    '   Minimum 8 findings per domain.',
-    '3. After all domain agents complete, dispatch the synthesis agent.',
-    '   Synthesis writes: outputs/summary/{YYYY-WNN}-summary.md',
-    '4. Report: domains run · findings file paths · finding count per domain · summary path.',
-  ].join('\n');
+function buildCommand(domain, focus) {
+  const cleaned = (focus ?? '').replaceAll('"', '').trim();
+  return cleaned ? `/research ${domain} "${cleaned}"` : `/research ${domain}`;
 }
 
 const monoMuted = {
@@ -35,12 +21,12 @@ const monoMuted = {
   letterSpacing: '0.1em'
 };
 
-export default function RunInstructions({ selected }) {
+export default function RunInstructions({ selected, focus }) {
   if (!selected || selected.length === 0) {
     return (
       <div style={{ padding: '4px 0' }}>
         <span style={{ fontFamily: 'IBM Plex Sans', fontSize: 13, color: '#4b4b4b' }}>
-          Pick one or more industries above to see the Claude Code commands to run.
+          Pick an industry above to see the Claude Code command to run.
         </span>
       </div>
     );
@@ -48,7 +34,7 @@ export default function RunInstructions({ selected }) {
 
   const week = getISOWeek(new Date());
   const weekLabel = `W${String(week).padStart(2, '0')}`;
-  const prompt = buildPrompt(selected);
+  const command = buildCommand(selected[0], focus);
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
@@ -62,9 +48,9 @@ export default function RunInstructions({ selected }) {
       </p>
       <CopyBlock label="terminal" text={'cd research-scout\nclaude'} />
       <p style={{ fontFamily: 'IBM Plex Sans', fontSize: 13, color: '#9b9b9b', margin: 0 }}>
-        Then paste this prompt into Claude Code:
+        Then run this slash command in Claude Code:
       </p>
-      <CopyBlock label="prompt" text={prompt} />
+      <CopyBlock label="slash command" text={command} />
     </div>
   );
 }
