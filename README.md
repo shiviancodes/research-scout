@@ -13,6 +13,23 @@ research-scout turns Claude Code into a private research analyst. Upload your ow
 </div>
 
 
+## Prerequisites
+
+- Python 3.11+ and Node 18+
+- **Poppler** — required for the armed-uploads **PDF** workflow. Claude
+  Code reads PDFs via `pdftoppm` (part of poppler); without it, uploaded
+  PDFs cannot be mined and the uploads scout reports
+  `DEGRADED: PDF unreadable — poppler not installed`. Markdown/text/URL
+  uploads work without it.
+
+  | OS | Install |
+  |----|---------|
+  | Windows | `winget install poppler` (or `choco install poppler`), then reopen the terminal so `pdftoppm` is on `PATH` |
+  | macOS | `brew install poppler` |
+  | Linux | `sudo apt install poppler-utils` |
+
+  Verify with `pdftoppm -v`.
+
 ## Quickstart
 
 ```bash
