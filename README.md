@@ -172,7 +172,7 @@ The synthesis agent aggregates findings by tag. No scoring, no tiers — humans 
 backend/                    FastAPI - serves outputs/ + agent/source endpoints
 frontend/                   React + Vite dashboard
 scripts/                    Pipeline helpers (lint_findings, update_registry, log_run,
-                            check_links, validate_domain)
+                            check_links, validate_domain) 
 outputs/                    Generated artefacts
   ├─ energy/                Per-domain weekly findings (+ .run/ scratch dirs)
   ├─ finance/
