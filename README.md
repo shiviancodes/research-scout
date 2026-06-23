@@ -13,7 +13,7 @@ research-scout turns Claude Code into a private research analyst. Arm your own r
 </div>
 
 ## Prerequisites
-
+ 
 - Python 3.11+ and Node 18+
 - **Poppler** — required for the armed-uploads **PDF** workflow. Claude
   Code reads PDFs via `pdftoppm` (part of poppler); without it, uploaded
